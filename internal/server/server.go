@@ -76,11 +76,14 @@ func setupGin(cfg *config.Config) {
 func setupRouter(authHandler *handler.AuthHandler) *gin.Engine {
 	router := gin.Default()
 
-	authGroup := router.Group("/auth")
+	apiGroup := router.Group("/api")
 	{
-		authGroup.POST("/register", authHandler.Register)
-		authGroup.POST("/login", authHandler.Login)
-		authGroup.POST("/guest_login", authHandler.GuestLogin)
+		authGroup := apiGroup.Group("/auth")
+		{
+			authGroup.POST("/register", authHandler.Register)
+			authGroup.POST("/login", authHandler.Login)
+			authGroup.POST("/guest_login", authHandler.GuestLogin)
+		}
 	}
 
 	return router
