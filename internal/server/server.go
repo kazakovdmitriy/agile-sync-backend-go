@@ -30,18 +30,20 @@ func NewServer(cfg *config.Config, log *zap.Logger) (*Server, error) {
 	}
 
 	// Инициализация репозиториев
-	// userRepo := repository.NewUserMemoryRepo(log)
 	userDBRepo := repository.NewUserDBRepo(dbconn.DB, log)
+	sessionDBRepo := repository.NewSessionDBRepo(dbconn.DB, log)
 
 	// Инициализация сервисов
 	jwtService := service.NewJwtService(cfg, log)
 	authService := service.NewAuthService(userDBRepo, jwtService, log)
+	sessionService := service.NewSessionService(sessionDBRepo, log)
 
 	// Инициализация хендлеров
 	authHandler := handler.NewAuthHandler(authService, log)
+	sessionHandler := handler.NewSessionHandler(sessionService, log)
 
 	// Настройка роутинга
-	router := setupRouter(authHandler, authService)
+	router := setupRouter(authHandler, sessionHandler, authService)
 
 	httpServer := &http.Server{
 		Addr:         cfg.ServerAddr,
@@ -76,6 +78,7 @@ func setupGin(cfg *config.Config) {
 
 func setupRouter(
 	authHandler *handler.AuthHandler,
+	sessionHandler *handler.SessionHandler,
 	authService service.AuthService,
 ) *gin.Engine {
 	router := gin.Default()
@@ -93,6 +96,12 @@ func setupRouter(
 		authProtectedGroup.Use(middleware.AuthMiddleware(authService))
 		{
 			authProtectedGroup.GET("/me", authHandler.Me)
+		}
+
+		sessionGroup := apiGroup.Group("/sessions")
+		sessionGroup.Use(middleware.AuthMiddleware(authService))
+		{
+			sessionGroup.GET("", sessionHandler.GetUserSession)
 		}
 	}
 

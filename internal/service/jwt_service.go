@@ -95,7 +95,6 @@ func (s *jwtService) ExtractUserIDFromToken(tokenString string) (string, error) 
 }
 
 func (s *jwtService) RefreshToken(refreshToken string) (map[string]string, error) {
-	// Валидируем refresh token
 	token, err := s.ValidateToken(refreshToken)
 	if err != nil {
 		return nil, err
@@ -106,6 +105,5 @@ func (s *jwtService) RefreshToken(refreshToken string) (map[string]string, error
 		return nil, jwt.ErrInvalidKey
 	}
 
-	// Генерируем новую пару токенов
 	return s.GenerateTokenPair(claims.UserID, claims.Email)
 }
