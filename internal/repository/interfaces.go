@@ -11,3 +11,7 @@ type UserRepository interface {
 	GetByEmail(ctx context.Context, email string) (*entitymodel.User, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*entitymodel.User, error)
 }
+
+type SessionRepository interface {
+	GetByCreator(ctx context.Context, userId string) ([]*entitymodel.Session, error)
+}

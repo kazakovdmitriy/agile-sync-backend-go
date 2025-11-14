@@ -11,7 +11,6 @@ type AuthService interface {
 	Register(ctx context.Context, req *apimodel.UserRegister) (*apimodel.TokenResponse, error)
 	Login(ctx context.Context, req *apimodel.UserLogin) (*apimodel.TokenResponse, error)
 	ValidateToken(ctx context.Context, token string) (*entitymodel.User, error)
-	//Me(ctx context.Context) (*apimodel.UserResponse, error)
 }
 
 type JWTService interface {
@@ -19,4 +18,8 @@ type JWTService interface {
 	ValidateToken(tokenString string) (*jwt.Token, error)
 	ExtractUserIDFromToken(tokenString string) (string, error)
 	RefreshToken(refreshToken string) (map[string]string, error)
+}
+
+type SessionService interface {
+	GetUserSession(ctx context.Context, userId string) ([]*entitymodel.Session, error)
 }

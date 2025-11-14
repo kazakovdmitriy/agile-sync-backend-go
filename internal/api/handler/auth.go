@@ -73,7 +73,7 @@ func (h *AuthHandler) Me(c *gin.Context) {
 		return
 	}
 
-	user, ok := userInterface.(*entitymodel.User) // замените *model.User на ваш реальный тип
+	user, ok := userInterface.(*entitymodel.User)
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
 		return
