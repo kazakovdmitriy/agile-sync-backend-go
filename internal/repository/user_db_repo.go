@@ -86,3 +86,21 @@ func (repo *UserDBRepo) GetByEmail(ctx context.Context, email string) (*entitymo
 
 	return converter.UserDBToEntity(&user), nil
 }
+
+func (repo *UserDBRepo) GetByID(ctx context.Context, id uuid.UUID) (*entitymodel.User, error) {
+	query := `
+	select id, session_id, name, is_creator, socket_id, created_at, updated_at, 
+	       is_watcher, on_session, email, hashed_password, is_active, is_verified, 
+	       oauth_provider, oauth_id, avatar_url, is_guest
+    from users
+	where id = $1
+	`
+
+	var user dbmodel.User
+	err := repo.db.GetContext(ctx, &user, query, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return converter.UserDBToEntity(&user), nil
+}

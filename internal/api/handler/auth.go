@@ -2,6 +2,8 @@ package handler
 
 import (
 	"backend_go/internal/model/apimodel"
+	"backend_go/internal/model/converter"
+	"backend_go/internal/model/entitymodel"
 	"backend_go/internal/service"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -62,4 +64,22 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, resp)
+}
+
+func (h *AuthHandler) Me(c *gin.Context) {
+	userInterface, exists := c.Get("user")
+	if !exists {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "User not found in context"})
+		return
+	}
+
+	user, ok := userInterface.(*entitymodel.User) // замените *model.User на ваш реальный тип
+	if !ok {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
+		return
+	}
+
+	userProfile := converter.ToUserProfile(user)
+
+	c.JSON(http.StatusOK, userProfile)
 }

@@ -2,6 +2,7 @@ package server
 
 import (
 	"backend_go/internal/api/handler"
+	"backend_go/internal/api/middleware"
 	"backend_go/internal/infrastructure/config"
 	"backend_go/internal/infrastructure/db"
 	"backend_go/internal/repository"
@@ -40,7 +41,7 @@ func NewServer(cfg *config.Config, log *zap.Logger) (*Server, error) {
 	authHandler := handler.NewAuthHandler(authService, log)
 
 	// Настройка роутинга
-	router := setupRouter(authHandler)
+	router := setupRouter(authHandler, authService)
 
 	httpServer := &http.Server{
 		Addr:         cfg.ServerAddr,
@@ -73,7 +74,10 @@ func setupGin(cfg *config.Config) {
 	}
 }
 
-func setupRouter(authHandler *handler.AuthHandler) *gin.Engine {
+func setupRouter(
+	authHandler *handler.AuthHandler,
+	authService service.AuthService,
+) *gin.Engine {
 	router := gin.Default()
 
 	apiGroup := router.Group("/api")
@@ -83,6 +87,12 @@ func setupRouter(authHandler *handler.AuthHandler) *gin.Engine {
 			authGroup.POST("/register", authHandler.Register)
 			authGroup.POST("/login", authHandler.Login)
 			authGroup.POST("/guest_login", authHandler.GuestLogin)
+		}
+
+		authProtectedGroup := apiGroup.Group("/auth")
+		authProtectedGroup.Use(middleware.AuthMiddleware(authService))
+		{
+			authProtectedGroup.GET("/me", authHandler.Me)
 		}
 	}
 

@@ -9,6 +9,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -99,4 +100,24 @@ func (s *AuthServiceImpl) Login(ctx context.Context, req *apimodel.UserLogin) (*
 		RefreshToken: tokens["refresh_token"],
 		TokenType:    tokens["token_type"],
 	}, nil
+}
+
+func (s *AuthServiceImpl) ValidateToken(ctx context.Context, token string) (*entitymodel.User, error) {
+	userIDStr, err := s.jwtService.ExtractUserIDFromToken(token)
+	if err != nil {
+		return nil, err
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		s.log.Info("failed to parse userID from token", zap.String("token", token))
+		return nil, err
+	}
+
+	user, err := s.userRepo.GetByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
