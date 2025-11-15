@@ -19,6 +19,33 @@ func NewSessionDBRepo(db *sqlx.DB, logger *zap.Logger) *SessionDBRepo {
 	}
 }
 
+func (r *SessionDBRepo) CreateSession(ctx context.Context, session *entitymodel.Session) (*entitymodel.Session, error) {
+	query := `
+	INSERT INTO sessions (
+		name, deck_type, cards_revealed, 
+	    creator_id, creator_name, created_via
+	) VALUES ($1, $2, $3, $4, $5, $6)
+	RETURNING id, name, deck_type, cards_revealed, 
+	    creator_id, creator_name, created_at, 
+	    updated_at, allow_emoji, auto_reveal, created_via`
+
+	var sessionResult entitymodel.Session
+
+	err := r.db.QueryRowContext(ctx, query,
+		session.Name,
+		session.DeckType,
+		session.CardsRevealed,
+		session.CreatorID,
+		session.CreatorName,
+		session.CreatedVia,
+	).Scan(&sessionResult)
+	if err != nil {
+		return nil, err
+	}
+
+	return &sessionResult, nil
+}
+
 func (r *SessionDBRepo) GetByCreator(ctx context.Context, userId string) ([]*entitymodel.Session, error) {
 	query := `
 	select id, name, deck_type, cards_revealed, 
