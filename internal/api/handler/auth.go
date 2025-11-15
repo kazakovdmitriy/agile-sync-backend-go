@@ -5,6 +5,7 @@ import (
 	"backend_go/internal/model/converter"
 	"backend_go/internal/model/entitymodel"
 	"backend_go/internal/service"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
@@ -54,11 +55,15 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	h.log.Debug("Handle Register", zap.String("name", req.Name), zap.String("email", req.Email))
-
 	resp, err := h.authService.Register(c.Request.Context(), &req)
 	if err != nil {
 		h.log.Info("Register Error", zap.Error(err))
+
+		if errors.Is(err, service.ErrUserAlreadyExists) {
+			c.JSON(http.StatusBadRequest, gin.H{"detail": "Пользователь с таким email уже существует"})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

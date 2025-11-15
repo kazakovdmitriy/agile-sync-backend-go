@@ -13,6 +13,8 @@ import (
 	"go.uber.org/zap"
 )
 
+var ErrUserAlreadyExists = errors.New("user already exists")
+
 type AuthServiceImpl struct {
 	userRepo   repository.UserRepository
 	jwtService JWTService
@@ -35,7 +37,7 @@ func (s *AuthServiceImpl) Register(ctx context.Context, req *apimodel.UserRegist
 	}
 
 	if existingUser != nil {
-		return nil, fmt.Errorf("user with email %s already exists", req.Email)
+		return nil, fmt.Errorf("%w, %s", ErrUserAlreadyExists, req.Email)
 	}
 
 	hashedPassword, err := hash.HashPassword(req.Password)
