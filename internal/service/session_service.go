@@ -51,7 +51,7 @@ func (s *sessionService) CreateSession(
 		CardsRevealed: false,
 		CreatorID:     user.ID,
 		CreatorName:   user.Name,
-		CreatedVia:    "Web",
+		CreatedVia:    "web",
 	}
 
 	sessionResult, err := s.sessionRepo.CreateSession(ctx, &session)
