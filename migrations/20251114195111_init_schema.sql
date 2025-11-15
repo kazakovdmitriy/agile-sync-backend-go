@@ -3,26 +3,9 @@
 -- Тип для OAuth-провайдеров
 CREATE TYPE public.oauthproviderenum AS ENUM ('GOOGLE', 'YANDEX');
 
--- Таблица сессий
-CREATE TABLE public.sessions (
-                                 id             UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-                                 name           VARCHAR NOT NULL,
-                                 deck_type      VARCHAR NOT NULL,
-                                 cards_revealed BOOLEAN,
-                                 creator_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                                 creator_name   VARCHAR NOT NULL,
-                                 created_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                                 updated_at     TIMESTAMP WITH TIME ZONE,
-                                 allow_emoji    BOOLEAN DEFAULT TRUE,
-                                 auto_reveal    BOOLEAN DEFAULT TRUE,
-                                 created_via    VARCHAR NOT NULL
-);
-ALTER TABLE public.sessions OWNER TO agile_poker_user;
-
 -- Таблица пользователей
 CREATE TABLE public.users (
                               id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-                              session_id      UUID REFERENCES public.sessions ON DELETE CASCADE,
                               name            VARCHAR NOT NULL,
                               is_creator      BOOLEAN,
                               socket_id       VARCHAR,
@@ -40,6 +23,22 @@ CREATE TABLE public.users (
                               is_guest        BOOLEAN
 );
 ALTER TABLE public.users OWNER TO agile_poker_user;
+
+-- Таблица сессий
+CREATE TABLE public.sessions (
+                                 id             UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                                 name           VARCHAR NOT NULL,
+                                 deck_type      VARCHAR NOT NULL,
+                                 cards_revealed BOOLEAN,
+                                 creator_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                                 creator_name   VARCHAR NOT NULL,
+                                 created_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                                 updated_at     TIMESTAMP WITH TIME ZONE,
+                                 allow_emoji    BOOLEAN DEFAULT TRUE,
+                                 auto_reveal    BOOLEAN DEFAULT TRUE,
+                                 created_via    VARCHAR NOT NULL
+);
+ALTER TABLE public.sessions OWNER TO agile_poker_user;
 
 -- Уникальный индекс по email
 CREATE UNIQUE INDEX ix_users_email ON public.users (email);

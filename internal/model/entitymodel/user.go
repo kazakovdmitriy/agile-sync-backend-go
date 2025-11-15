@@ -24,7 +24,6 @@ type User struct {
 	OAuthProvider  *OAuthProvider
 	OAuthID        *string
 	AvatarURL      *string
-	SessionID      *string
 	IsCreator      bool
 	IsWatcher      bool
 	OnSession      bool
@@ -57,9 +56,6 @@ func (u *User) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	}
 	if u.AvatarURL != nil {
 		enc.AddString("avatar_url", *u.AvatarURL)
-	}
-	if u.SessionID != nil {
-		enc.AddString("session_id", *u.SessionID)
 	}
 	if u.SocketID != nil {
 		enc.AddString("socket_id", *u.SocketID)

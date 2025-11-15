@@ -12,7 +12,6 @@ const (
 
 type User struct {
 	ID             string             `db:"id"`
-	SessionID      *string            `db:"session_id"`
 	Name           string             `db:"name"`
 	Email          string             `db:"email"`
 	HashedPassword string             `db:"hashed_password"`

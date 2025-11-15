@@ -23,22 +23,22 @@ func (r *SessionDBRepo) CreateSession(ctx context.Context, session *entitymodel.
 	query := `
 	INSERT INTO sessions (
 		name, deck_type, cards_revealed, 
-	    creator_id, creator_name, created_via
+		creator_id, creator_name, created_via
 	) VALUES ($1, $2, $3, $4, $5, $6)
 	RETURNING id, name, deck_type, cards_revealed, 
-	    creator_id, creator_name, created_at, 
-	    updated_at, allow_emoji, auto_reveal, created_via`
+			  creator_id, creator_name, created_at, 
+			  updated_at, allow_emoji, auto_reveal, created_via`
 
 	var sessionResult entitymodel.Session
 
-	err := r.db.QueryRowContext(ctx, query,
+	err := r.db.QueryRowxContext(ctx, query,
 		session.Name,
 		session.DeckType,
 		session.CardsRevealed,
 		session.CreatorID,
 		session.CreatorName,
 		session.CreatedVia,
-	).Scan(&sessionResult)
+	).StructScan(&sessionResult)
 	if err != nil {
 		return nil, err
 	}

@@ -6,15 +6,15 @@ import (
 )
 
 type Session struct {
-	ID            uuid.UUID
-	Name          string
-	DeckType      string
-	CardsRevealed bool
-	CreatorID     uuid.UUID
-	CreatorName   string
-	AllowEmoji    bool
-	AutoReveal    bool
-	CreatedVia    string
-	CreatedAt     *time.Time
-	UpdatedAt     *time.Time
+	ID            uuid.UUID  `db:"id"`
+	Name          string     `db:"name"`
+	DeckType      string     `db:"deck_type"`
+	CardsRevealed bool       `db:"cards_revealed"`
+	CreatorID     uuid.UUID  `db:"creator_id"`
+	CreatorName   string     `db:"creator_name"`
+	AllowEmoji    bool       `db:"allow_emoji"`
+	AutoReveal    bool       `db:"auto_reveal"`
+	CreatedVia    string     `db:"created_via"`
+	CreatedAt     *time.Time `db:"created_at"`
+	UpdatedAt     *time.Time `db:"updated_at"`
 }

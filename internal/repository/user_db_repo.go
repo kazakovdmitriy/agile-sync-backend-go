@@ -71,7 +71,7 @@ func (repo *UserDBRepo) Create(ctx context.Context, user *entitymodel.User) (*en
 func (repo *UserDBRepo) GetByEmail(ctx context.Context, email string) (*entitymodel.User, error) {
 
 	query := `
-	select id, session_id, name, is_creator, socket_id, created_at, updated_at, 
+	select id, name, is_creator, socket_id, created_at, updated_at, 
 	       is_watcher, on_session, email, hashed_password, is_active, is_verified, 
 	       oauth_provider, oauth_id, avatar_url, is_guest
     from users
@@ -89,7 +89,7 @@ func (repo *UserDBRepo) GetByEmail(ctx context.Context, email string) (*entitymo
 
 func (repo *UserDBRepo) GetByID(ctx context.Context, id uuid.UUID) (*entitymodel.User, error) {
 	query := `
-	select id, session_id, name, is_creator, socket_id, created_at, updated_at, 
+	select id, name, is_creator, socket_id, created_at, updated_at, 
 	       is_watcher, on_session, email, hashed_password, is_active, is_verified, 
 	       oauth_provider, oauth_id, avatar_url, is_guest
     from users
