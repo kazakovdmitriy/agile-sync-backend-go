@@ -23,7 +23,6 @@ func UserEntityToAPI(user *entitymodel.User) *apimodel.UserResponse {
 		IsVerified: user.IsVerified,
 		IsGuest:    user.IsGuest,
 		AvatarURL:  user.AvatarURL,
-		SessionID:  user.SessionID,
 		IsCreator:  user.IsCreator,
 		IsWatcher:  user.IsWatcher,
 		OnSession:  user.OnSession,
@@ -61,7 +60,6 @@ func UserDBToEntity(user *dbmodel.User) *entitymodel.User {
 
 	entityUser := &entitymodel.User{
 		ID:             id,
-		SessionID:      user.SessionID,
 		Name:           user.Name,
 		Email:          user.Email,          // Конвертируем string в *string
 		HashedPassword: user.HashedPassword, // Конвертируем string в *string
@@ -114,7 +112,6 @@ func UserAPIToEntity(user *apimodel.UserResponse) *entitymodel.User {
 		IsVerified: user.IsVerified,
 		IsGuest:    user.IsGuest,
 		AvatarURL:  user.AvatarURL,
-		SessionID:  user.SessionID,
 		IsCreator:  user.IsCreator,
 		IsWatcher:  user.IsWatcher,
 		OnSession:  user.OnSession,
@@ -146,7 +143,6 @@ func UserEntityToDB(user *entitymodel.User) *dbmodel.User {
 
 	dbUser := &dbmodel.User{
 		ID:             id,
-		SessionID:      user.SessionID,
 		Name:           user.Name,
 		Email:          user.Email,          // Конвертируем *string в string
 		HashedPassword: user.HashedPassword, // Конвертируем *string в string
