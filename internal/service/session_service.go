@@ -1,9 +1,11 @@
 package service
 
 import (
+	"backend_go/internal/model/apimodel"
 	"backend_go/internal/model/entitymodel"
 	"backend_go/internal/repository"
 	"context"
+	"fmt"
 	"go.uber.org/zap"
 )
 
@@ -32,4 +34,30 @@ func (s *sessionService) GetUserSession(
 	}
 
 	return sessions, nil
+}
+
+func (s *sessionService) CreateSession(
+	ctx context.Context,
+	sessionCreate *apimodel.SessionCreate,
+	user *entitymodel.User,
+) (*entitymodel.Session, error) {
+	if user.IsGuest {
+		return nil, fmt.Errorf("user is a guest")
+	}
+
+	session := entitymodel.Session{
+		Name:          sessionCreate.Name,
+		DeckType:      sessionCreate.DeckType,
+		CardsRevealed: false,
+		CreatorID:     user.ID,
+		CreatorName:   user.Name,
+		CreatedVia:    "Web",
+	}
+
+	sessionResult, err := s.sessionRepo.CreateSession(ctx, &session)
+	if err != nil {
+		return nil, err
+	}
+
+	return sessionResult, nil
 }

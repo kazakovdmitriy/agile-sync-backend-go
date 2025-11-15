@@ -2,7 +2,6 @@ package server
 
 import (
 	"backend_go/internal/api/handler"
-	"backend_go/internal/api/middleware"
 	"backend_go/internal/infrastructure/config"
 	"backend_go/internal/infrastructure/db"
 	"backend_go/internal/repository"
@@ -74,36 +73,4 @@ func setupGin(cfg *config.Config) {
 	if cfg.IsProduction() {
 		gin.SetMode(gin.ReleaseMode)
 	}
-}
-
-func setupRouter(
-	authHandler *handler.AuthHandler,
-	sessionHandler *handler.SessionHandler,
-	authService service.AuthService,
-) *gin.Engine {
-	router := gin.Default()
-
-	apiGroup := router.Group("/api")
-	{
-		authGroup := apiGroup.Group("/auth")
-		{
-			authGroup.POST("/register", authHandler.Register)
-			authGroup.POST("/login", authHandler.Login)
-			authGroup.POST("/guest_login", authHandler.GuestLogin)
-		}
-
-		authProtectedGroup := apiGroup.Group("/auth")
-		authProtectedGroup.Use(middleware.AuthMiddleware(authService))
-		{
-			authProtectedGroup.GET("/me", authHandler.Me)
-		}
-
-		sessionGroup := apiGroup.Group("/sessions")
-		sessionGroup.Use(middleware.AuthMiddleware(authService))
-		{
-			sessionGroup.GET("", sessionHandler.GetUserSession)
-		}
-	}
-
-	return router
 }

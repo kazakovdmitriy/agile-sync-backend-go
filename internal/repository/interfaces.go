@@ -14,4 +14,5 @@ type UserRepository interface {
 
 type SessionRepository interface {
 	GetByCreator(ctx context.Context, userId string) ([]*entitymodel.Session, error)
+	CreateSession(ctx context.Context, session *entitymodel.Session) (*entitymodel.Session, error)
 }

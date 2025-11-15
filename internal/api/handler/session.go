@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"backend_go/internal/model/apimodel"
 	"backend_go/internal/model/entitymodel"
 	"backend_go/internal/service"
 	"github.com/gin-gonic/gin"
@@ -20,16 +21,39 @@ func NewSessionHandler(sessionService service.SessionService, log *zap.Logger) *
 	}
 }
 
-func (h *SessionHandler) GetUserSession(c *gin.Context) {
-	userInterface, exists := c.Get("user")
-	if !exists {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "User not found in context"})
+func (h *SessionHandler) Create(c *gin.Context) {
+	var req apimodel.SessionCreate
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.log.Info("Bind Error", zap.Error(err))
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	user, ok := userInterface.(*entitymodel.User)
+	user, ok := h.getUser(c)
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
+		return
+	}
+
+	session, err := h.sessionService.CreateSession(c.Request.Context(), &req, user)
+	if err != nil {
+		h.log.Info("Create Error", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(
+		http.StatusCreated,
+		gin.H{
+			"session_id": session.ID.String(),
+			"user_id":    user.ID.String(),
+			"created_at": session.CreatedAt,
+		},
+	)
+}
+
+func (h *SessionHandler) GetUserSession(c *gin.Context) {
+	user, ok := h.getUser(c)
+	if !ok {
 		return
 	}
 
@@ -48,4 +72,20 @@ func (h *SessionHandler) GetUserSession(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, sessions)
+}
+
+func (h *SessionHandler) getUser(c *gin.Context) (*entitymodel.User, bool) {
+	userInterface, exists := c.Get("user")
+	if !exists {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "User not found in context"})
+		return nil, false
+	}
+
+	user, ok := userInterface.(*entitymodel.User)
+	if !ok {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
+		return nil, false
+	}
+
+	return user, true
 }

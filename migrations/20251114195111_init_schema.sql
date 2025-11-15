@@ -5,11 +5,11 @@ CREATE TYPE public.oauthproviderenum AS ENUM ('GOOGLE', 'YANDEX');
 
 -- Таблица сессий
 CREATE TABLE public.sessions (
-                                 id             UUID PRIMARY KEY,
+                                 id             UUID DEFAULT gen_random_uuid() PRIMARY KEY,
                                  name           VARCHAR NOT NULL,
                                  deck_type      VARCHAR NOT NULL,
                                  cards_revealed BOOLEAN,
-                                 creator_id     UUID NOT NULL,
+                                 creator_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                                  creator_name   VARCHAR NOT NULL,
                                  created_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                                  updated_at     TIMESTAMP WITH TIME ZONE,
@@ -46,7 +46,7 @@ CREATE UNIQUE INDEX ix_users_email ON public.users (email);
 
 -- Таблица голосов
 CREATE TABLE public.votes (
-                              id         UUID PRIMARY KEY,
+                              id         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
                               session_id UUID NOT NULL REFERENCES public.sessions ON DELETE CASCADE,
                               user_id    UUID NOT NULL REFERENCES public.users ON DELETE CASCADE,
                               value      VARCHAR NOT NULL,
@@ -57,7 +57,7 @@ ALTER TABLE public.votes OWNER TO agile_poker_user;
 
 -- Таблица реакций
 CREATE TABLE public.reactions (
-                                  id           UUID PRIMARY KEY,
+                                  id           UUID DEFAULT gen_random_uuid() PRIMARY KEY,
                                   session_id   UUID NOT NULL REFERENCES public.sessions ON DELETE CASCADE,
                                   from_user_id UUID NOT NULL REFERENCES public.users ON DELETE CASCADE,
                                   to_user_id   UUID NOT NULL REFERENCES public.users ON DELETE CASCADE,
