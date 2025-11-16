@@ -74,6 +74,31 @@ func (h *SessionHandler) GetUserSession(c *gin.Context) {
 	c.JSON(http.StatusOK, sessions)
 }
 
+func (h *SessionHandler) DeleteSession(c *gin.Context) {
+	user, ok := h.getUser(c)
+	if !ok {
+		return
+	}
+
+	if user.IsGuest {
+		c.AbortWithStatusJSON(
+			http.StatusForbidden,
+			gin.H{"detail": "Гостевые пользователи не могут удалять сессии."},
+		)
+		return
+	}
+
+	sessionID := c.Param("session_id")
+	err := h.sessionService.DeleteSession(c.Request.Context(), sessionID, user.ID.String())
+	if err != nil {
+		h.log.Info("Delete Error", zap.Error(err))
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Error deleting session"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Сессия успешно удалена"})
+}
+
 func (h *SessionHandler) getUser(c *gin.Context) (*entitymodel.User, bool) {
 	userInterface, exists := c.Get("user")
 	if !exists {

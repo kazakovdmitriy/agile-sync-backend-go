@@ -36,6 +36,7 @@ func setupRouter(
 		{
 			sessionGroup.GET("", sessionHandler.GetUserSession)
 			sessionGroup.POST("", sessionHandler.Create)
+			sessionGroup.DELETE("/:session_id", sessionHandler.DeleteSession)
 		}
 	}
 

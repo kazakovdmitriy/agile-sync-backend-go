@@ -61,3 +61,17 @@ func (s *sessionService) CreateSession(
 
 	return sessionResult, nil
 }
+
+func (s *sessionService) DeleteSession(ctx context.Context, sessionId string, userId string) error {
+
+	session, err := s.sessionRepo.GetByID(ctx, sessionId)
+	if err != nil {
+		return err
+	}
+
+	if session.CreatorID.String() != userId {
+		return fmt.Errorf("user is not a creator of session")
+	}
+
+	return s.sessionRepo.DeleteSession(ctx, sessionId)
+}
