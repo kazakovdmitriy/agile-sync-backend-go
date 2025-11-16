@@ -46,6 +46,23 @@ func (r *SessionDBRepo) CreateSession(ctx context.Context, session *entitymodel.
 	return &sessionResult, nil
 }
 
+func (r *SessionDBRepo) GetByID(ctx context.Context, sessionId string) (*entitymodel.Session, error) {
+	query := `
+	select id, name, deck_type, cards_revealed, 
+	       creator_id, creator_name, created_at, 
+	       updated_at, allow_emoji, auto_reveal, created_via
+		from sessions
+		where id = $1
+	`
+
+	var sessionResult entitymodel.Session
+	err := r.db.QueryRowxContext(ctx, query, sessionId).StructScan(&sessionResult)
+	if err != nil {
+		return nil, err
+	}
+	return &sessionResult, nil
+}
+
 func (r *SessionDBRepo) GetByCreator(ctx context.Context, userId string) ([]*entitymodel.Session, error) {
 	query := `
 	select id, name, deck_type, cards_revealed, 
@@ -77,4 +94,18 @@ func (r *SessionDBRepo) GetByCreator(ctx context.Context, userId string) ([]*ent
 	}
 
 	return sessions, nil
+}
+
+func (r *SessionDBRepo) DeleteSession(ctx context.Context, sessionId string) error {
+	query := `
+	DELETE FROM sessions
+	where id = $1
+	`
+
+	_, err := r.db.ExecContext(ctx, query, sessionId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
