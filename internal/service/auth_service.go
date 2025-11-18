@@ -47,7 +47,7 @@ func (s *AuthServiceImpl) Register(ctx context.Context, req *apimodel.UserRegist
 
 	newUser := entitymodel.User{
 		Name:           req.Name,
-		Email:          req.Email,
+		Email:          &req.Email,
 		HashedPassword: hashedPassword,
 		IsActive:       true,
 		IsVerified:     false,

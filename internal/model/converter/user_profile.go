@@ -21,7 +21,7 @@ func ToUserProfile(u *entitymodel.User) apimodel.UserProfile {
 	return apimodel.UserProfile{
 		Id:            u.ID,
 		Name:          u.Name,
-		Email:         u.Email,
+		Email:         *u.Email,
 		IsActive:      u.IsActive,
 		IsVerified:    u.IsVerified,
 		IsGuest:       u.IsGuest,

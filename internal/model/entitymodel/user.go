@@ -16,7 +16,7 @@ const (
 type User struct {
 	ID             uuid.UUID
 	Name           string
-	Email          string
+	Email          *string
 	HashedPassword string
 	IsActive       bool
 	IsVerified     bool
@@ -36,7 +36,7 @@ type User struct {
 func (u *User) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	enc.AddString("id", u.ID.String())
 	enc.AddString("name", u.Name)
-	enc.AddString("email", u.Email)
+	enc.AddString("email", *u.Email)
 	enc.AddBool("is_active", u.IsActive)
 	enc.AddBool("is_verified", u.IsVerified)
 	enc.AddBool("is_guest", u.IsGuest)

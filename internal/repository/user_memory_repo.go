@@ -23,7 +23,7 @@ func (repo *UserMemoryRepo) Create(ctx context.Context, user entitymodel.User) {
 
 func (repo *UserMemoryRepo) GetByEmail(ctx context.Context, email string) (*entitymodel.User, error) {
 	for _, user := range repo.users {
-		if user.Email == email {
+		if user.Email == &email {
 			return &user, nil
 		}
 	}
