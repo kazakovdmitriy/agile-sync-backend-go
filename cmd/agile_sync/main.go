@@ -14,6 +14,11 @@ import (
 )
 
 func main() {
+	configPath := os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		configPath = "configs/config.yaml"
+	}
+
 	cfg, err := config.LoadConfig("configs/config.yaml")
 
 	fmt.Println(cfg)
