@@ -22,15 +22,13 @@ func NewJwtService(cfg *config.Config, log *zap.Logger) *jwtService {
 // CustomClaims - кастомные claims для нашего приложения
 type CustomClaims struct {
 	UserID string `json:"user_id"`
-	Email  string `json:"email"`
 	jwt.RegisteredClaims
 }
 
-func (s *jwtService) GenerateTokenPair(userID string, email string) (map[string]string, error) {
+func (s *jwtService) GenerateTokenPair(userID string) (map[string]string, error) {
 	// Access Token
 	accessTokenClaims := CustomClaims{
 		UserID: userID,
-		Email:  email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.cfg.GetAccessTokenTTL())),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -49,7 +47,6 @@ func (s *jwtService) GenerateTokenPair(userID string, email string) (map[string]
 	// Refresh Token
 	refreshTokenClaims := CustomClaims{
 		UserID: userID,
-		Email:  email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.cfg.GetRefreshTokenTTL())),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -105,5 +102,5 @@ func (s *jwtService) RefreshToken(refreshToken string) (map[string]string, error
 		return nil, jwt.ErrInvalidKey
 	}
 
-	return s.GenerateTokenPair(claims.UserID, claims.Email)
+	return s.GenerateTokenPair(claims.UserID)
 }

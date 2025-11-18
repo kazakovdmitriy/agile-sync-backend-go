@@ -62,7 +62,33 @@ func (s *AuthServiceImpl) Register(ctx context.Context, req *apimodel.UserRegist
 		return nil, err
 	}
 
-	tokens, err := s.jwtService.GenerateTokenPair(createdUser.ID.String(), createdUser.Email)
+	tokens, err := s.jwtService.GenerateTokenPair(createdUser.ID.String())
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate tokens: %w", err)
+	}
+
+	return &apimodel.TokenResponse{
+		AccessToken:  tokens["access_token"],
+		RefreshToken: tokens["refresh_token"],
+		TokenType:    tokens["token_type"],
+	}, nil
+}
+
+func (s *AuthServiceImpl) GuestLogin(ctx context.Context, req *apimodel.GuestLogin) (*apimodel.TokenResponse, error) {
+	newUser := entitymodel.User{
+		Name:       req.Name,
+		IsActive:   true,
+		IsVerified: false,
+		IsGuest:    true,
+		OnSession:  true,
+	}
+
+	createdUser, err := s.userRepo.Create(ctx, &newUser)
+	if err != nil {
+		return nil, err
+	}
+
+	tokens, err := s.jwtService.GenerateTokenPair(createdUser.ID.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate tokens: %w", err)
 	}
@@ -92,7 +118,7 @@ func (s *AuthServiceImpl) Login(ctx context.Context, req *apimodel.UserLogin) (*
 		return nil, fmt.Errorf("user is not active")
 	}
 
-	tokens, err := s.jwtService.GenerateTokenPair(user.ID.String(), user.Email)
+	tokens, err := s.jwtService.GenerateTokenPair(user.ID.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate tokens: %w", err)
 	}
