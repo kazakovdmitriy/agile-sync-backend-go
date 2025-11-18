@@ -67,6 +67,7 @@ func NewServer(cfg *config.Config, log *zap.Logger) (*Server, error) {
 }
 
 func (s *Server) Run() error {
+	s.log.Info("server started", zap.String("addr", s.httpServer.Addr))
 	return s.httpServer.ListenAndServe()
 }
 
