@@ -25,6 +25,7 @@ WORKDIR /app
 COPY --from=builder /app/server .
 COPY --from=builder /app/migrate .
 COPY --from=builder /app/migrations ./migrations/
+COPY --from=builder /app/configs ./configs/
 
 COPY --from=builder /app/scripts/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh

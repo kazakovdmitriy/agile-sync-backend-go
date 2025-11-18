@@ -19,6 +19,11 @@ func main() {
 		log.Fatal("использование: go run cmd/migrate/main.go up|down|status|version")
 	}
 
+	configPath := os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		configPath = "configs/config.yaml" // fallback для локальной разработки
+	}
+
 	cfg, err := config.LoadConfig("configs/config.yaml")
 	if err != nil {
 		log.Fatal(err)
