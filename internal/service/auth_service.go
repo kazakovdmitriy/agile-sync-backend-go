@@ -77,6 +77,7 @@ func (s *AuthServiceImpl) Register(ctx context.Context, req *apimodel.UserRegist
 func (s *AuthServiceImpl) GuestLogin(ctx context.Context, req *apimodel.GuestLogin) (*apimodel.TokenResponse, error) {
 	newUser := entitymodel.User{
 		Name:       req.Name,
+		Email:      nil,
 		IsActive:   true,
 		IsVerified: false,
 		IsGuest:    true,
