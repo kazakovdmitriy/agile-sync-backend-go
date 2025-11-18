@@ -134,7 +134,7 @@ func matchWildcard(pattern, origin string) bool {
 
 func setDefaults() {
 	// Server defaults
-	viper.SetDefault("server.addr", ":8081")
+	viper.SetDefault("server.addr", ":8080")
 	viper.SetDefault("server.read_timeout", 10)
 	viper.SetDefault("server.write_timeout", 10)
 	viper.SetDefault("server.max_connections", 100)
