@@ -43,6 +43,23 @@ ALTER TABLE public.sessions OWNER TO agile_poker_user;
 -- Уникальный индекс по email
 CREATE UNIQUE INDEX ix_users_email ON public.users (email);
 
+-- Детальная история подключений пользователей к сессиям
+CREATE TABLE public.session_connections (
+                                id             UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                                session_id     UUID NOT NULL REFERENCES public.sessions(id) ON DELETE CASCADE,
+                                user_id        UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+                                connected_at   TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                                disconnected_at TIMESTAMP WITH TIME ZONE
+);
+
+-- Индексы для быстрых запросов
+CREATE INDEX idx_active_connections ON public.session_connections (session_id)
+    WHERE disconnected_at IS NULL;  -- Только активные подключения
+
+CREATE INDEX idx_user_session_history ON public.session_connections (user_id, session_id);
+
+ALTER TABLE public.session_connections OWNER TO agile_poker_user;
+
 -- Таблица голосов
 CREATE TABLE public.votes (
                               id         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
