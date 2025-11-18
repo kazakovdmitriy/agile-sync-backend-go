@@ -17,4 +17,6 @@ type SessionRepository interface {
 	GetByID(ctx context.Context, sessionId string) (*entitymodel.Session, error)
 	CreateSession(ctx context.Context, session *entitymodel.Session) (*entitymodel.Session, error)
 	DeleteSession(ctx context.Context, sessionId string) error
+	ConnectUserToSession(ctx context.Context, userID uuid.UUID, sessionID uuid.UUID) error
+	DisconnectUserFromSession(ctx context.Context, userID uuid.UUID, sessionID uuid.UUID) error
 }
