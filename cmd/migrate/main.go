@@ -19,12 +19,15 @@ func main() {
 		log.Fatal("использование: go run cmd/migrate/main.go up|down|status|version")
 	}
 
-	cfg := config.LoadConfig()
-	if cfg.DatabaseURL == "" {
+	cfg, err := config.LoadConfig("configs/config.yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if cfg.Database.URL == "" {
 		log.Fatal("ошибка: DATABASE_URL не задан в конфигурации")
 	}
 
-	db, err := sql.Open("pgx", cfg.DatabaseURL)
+	db, err := sql.Open("pgx", cfg.Database.URL)
 	if err != nil {
 		log.Fatal("не удалось открыть подключение к БД:", err)
 	}
