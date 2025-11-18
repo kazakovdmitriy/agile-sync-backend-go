@@ -54,7 +54,8 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 	}
 	defer conn.Close()
 
-	// Настраиваем соединение
+	h.log.Info("new websocket connection", zap.String("From", conn.RemoteAddr().String()))
+
 	h.configureConnection(conn)
 
 	var sessionID string
@@ -68,7 +69,7 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 		var data map[string]interface{}
 		if err := conn.ReadJSON(&data); err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				h.log.Debug("WebSocket error", zap.Error(err))
+				h.log.Error("WebSocket error", zap.Error(err))
 			}
 			break
 		}
