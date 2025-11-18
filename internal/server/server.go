@@ -2,6 +2,7 @@ package server
 
 import (
 	"backend_go/internal/api/handler"
+	"backend_go/internal/api/websocket"
 	"backend_go/internal/infrastructure/config"
 	"backend_go/internal/infrastructure/db"
 	"backend_go/internal/repository"
@@ -23,7 +24,12 @@ func NewServer(cfg *config.Config, log *zap.Logger) (*Server, error) {
 	setupGin(cfg)
 
 	// Инициализация БД
-	dbconn, err := db.NewPostgresDB(cfg.DatabaseURL, cfg.DBMaxOpenConns, cfg.DBMaxIdleConns, cfg.DBConnMaxLifetime)
+	dbconn, err := db.NewPostgresDB(
+		cfg.Database.URL,
+		cfg.Database.MaxOpenConns,
+		cfg.Database.MaxIdleConns,
+		cfg.Database.ConnMaxLifetime,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -37,18 +43,21 @@ func NewServer(cfg *config.Config, log *zap.Logger) (*Server, error) {
 	authService := service.NewAuthService(userDBRepo, jwtService, log)
 	sessionService := service.NewSessionService(sessionDBRepo, log)
 
+	// Инициализация вебсокета
+	wsManager := websocket.NewWebSocketHandler(cfg, log, sessionService)
+
 	// Инициализация хендлеров
 	authHandler := handler.NewAuthHandler(authService, log)
 	sessionHandler := handler.NewSessionHandler(sessionService, log)
 
 	// Настройка роутинга
-	router := setupRouter(authHandler, sessionHandler, authService)
+	router := setupRouter(wsManager, authHandler, sessionHandler, authService)
 
 	httpServer := &http.Server{
-		Addr:         cfg.ServerAddr,
+		Addr:         cfg.Server.Addr,
 		Handler:      router,
-		ReadTimeout:  time.Duration(cfg.ReadTimeout) * time.Second,
-		WriteTimeout: time.Duration(cfg.WriteTimeout) * time.Second,
+		ReadTimeout:  time.Duration(cfg.Server.ReadTimeout) * time.Second,
+		WriteTimeout: time.Duration(cfg.Server.WriteTimeout) * time.Second,
 	}
 
 	return &Server{

@@ -1,0 +1,28 @@
+environment: development
+log_level: info
+
+server:
+  read_timeout: 10
+  write_timeout: 10
+  max_connections: 100
+
+database:
+  max_open_conns: 5
+  max_idle_conns: 25
+  conn_max_lifetime: 25
+
+websocket:
+  enabled: true
+  handshake_timeout: 10s
+  write_timeout: 10s
+  read_timeout: 60s
+  pong_timeout: 60s
+  ping_interval: 30s
+  read_buffer_size: 4096
+  write_buffer_size: 4096
+  max_message_size: 1048576
+  max_connections_per_session: 100
+  enable_compression: true
+
+rate_limit:
+  requests_per_minute: 1000

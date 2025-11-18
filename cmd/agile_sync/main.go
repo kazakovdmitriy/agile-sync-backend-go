@@ -5,6 +5,7 @@ import (
 	"backend_go/internal/infrastructure/logger"
 	server2 "backend_go/internal/server"
 	"context"
+	"fmt"
 	"go.uber.org/zap"
 	"log"
 	"os"
@@ -13,7 +14,13 @@ import (
 )
 
 func main() {
-	cfg := config.LoadConfig()
+	cfg, err := config.LoadConfig("configs/config.yaml")
+
+	fmt.Println(cfg)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	logger, err := logger.Initialize(cfg.LogLevel)
 	if err != nil {

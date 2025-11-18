@@ -3,11 +3,13 @@ package server
 import (
 	"backend_go/internal/api/handler"
 	"backend_go/internal/api/middleware"
+	"backend_go/internal/api/websocket"
 	"backend_go/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
 func setupRouter(
+	wsManager *websocket.WebSocketHandler,
 	authHandler *handler.AuthHandler,
 	sessionHandler *handler.SessionHandler,
 	authService service.AuthService,
@@ -39,6 +41,8 @@ func setupRouter(
 			sessionGroup.DELETE("/:session_id", sessionHandler.DeleteSession)
 		}
 	}
+
+	router.GET("/ws", wsManager.HandleWebSocket)
 
 	return router
 }
