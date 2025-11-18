@@ -35,13 +35,13 @@ func (s *jwtService) GenerateTokenPair(userID string, email string) (map[string]
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.cfg.GetAccessTokenTTL())),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer:    s.cfg.JWTIssuer,
+			Issuer:    s.cfg.JWT.Issuer,
 			Subject:   userID,
 		},
 	}
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
-	accessTokenString, err := accessToken.SignedString([]byte(s.cfg.JWTSecret))
+	accessTokenString, err := accessToken.SignedString([]byte(s.cfg.JWT.SecretKey))
 	if err != nil {
 		return nil, err
 	}
@@ -54,13 +54,13 @@ func (s *jwtService) GenerateTokenPair(userID string, email string) (map[string]
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.cfg.GetRefreshTokenTTL())),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer:    s.cfg.JWTIssuer,
+			Issuer:    s.cfg.JWT.Issuer,
 			Subject:   userID,
 		},
 	}
 
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims)
-	refreshTokenString, err := refreshToken.SignedString([]byte(s.cfg.JWTSecret))
+	refreshTokenString, err := refreshToken.SignedString([]byte(s.cfg.JWT.SecretKey))
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func (s *jwtService) ValidateToken(tokenString string) (*jwt.Token, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, jwt.ErrSignatureInvalid
 		}
-		return []byte(s.cfg.JWTSecret), nil
+		return []byte(s.cfg.JWT.SecretKey), nil
 	})
 }
 
