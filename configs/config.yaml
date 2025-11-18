@@ -2,7 +2,7 @@ environment: development
 log_level: info
 
 server:
-  addr: 8080
+  addr: :8081
   read_timeout: 10
   write_timeout: 10
   max_connections: 100
