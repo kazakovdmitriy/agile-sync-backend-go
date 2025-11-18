@@ -43,7 +43,21 @@ func (h *AuthHandler) Login(c *gin.Context) {
 }
 
 func (h *AuthHandler) GuestLogin(c *gin.Context) {
-	h.log.Info("Handle Guest Logout")
+	var req apimodel.GuestLogin
+	if err := c.ShouldBind(&req); err != nil {
+		h.log.Info("Bind Error", zap.Error(err))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error from server"})
+		return
+	}
+
+	resp, err := h.authService.GuestLogin(c.Request.Context(), &req)
+	if err != nil {
+		h.log.Info("GuestLogin Error", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "GuestLogin failure"})
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
