@@ -77,7 +77,7 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 		h.log.Info("WebSocket received", zap.Any("data", data))
 
 		// Обрабатываем сообщение через сервис
-		if err := h.service.HandleMessage(conn, data); err != nil {
+		if err := h.service.HandleMessage(c.Request.Context(), conn, data); err != nil {
 			h.log.Error("WebSocket error", zap.Error(err))
 		}
 

@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"context"
 	"github.com/gorilla/websocket"
 )
 
@@ -18,7 +19,7 @@ func (h *RevealCardsHandler) CanHandle(event string) bool {
 	return event == "reveal_cards"
 }
 
-func (h *RevealCardsHandler) Handle(conn *websocket.Conn, data map[string]interface{}) error {
+func (h *RevealCardsHandler) Handle(ctx context.Context, conn *websocket.Conn, data map[string]interface{}) error {
 	h.log.Info("Handling reveal card event")
 	return nil
 }

@@ -24,6 +24,7 @@ type JWTService interface {
 type SessionService interface {
 	GetUserSession(ctx context.Context, userId string) ([]*entitymodel.Session, error)
 	CreateSession(ctx context.Context, sessions *apimodel.SessionCreate, user *entitymodel.User) (*entitymodel.Session, error)
-	DeleteSession(ctx context.Context, sessionId string, userId string) error
+	DeleteSession(ctx context.Context, sessionId, userId string) error
 	GetSessionByID(ctx context.Context, sessionId string) (*apimodel.Session, error)
+	ConnectUserToSession(ctx context.Context, userID, sessionID string) error
 }

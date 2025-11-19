@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"context"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 )
@@ -19,19 +20,45 @@ func (h *JoinSessionHandler) CanHandle(event string) bool {
 	return event == "join_session"
 }
 
-func (h *JoinSessionHandler) Handle(conn *websocket.Conn, data map[string]interface{}) error {
+func (h *JoinSessionHandler) Handle(ctx context.Context, conn *websocket.Conn, data map[string]interface{}) error {
 	h.log.Debug("Handle join session", zap.Any("data", data))
 
-	err := h.manager.SendTo(conn, map[string]interface{}{
+	sessionID := data["session_id"].(string)
+	userID := data["user_id"].(string)
+	userName := data["name"].(string)
+	//isWatcher := data["is_watcher"].(bool)
+
+	err := h.sessionService.ConnectUserToSession(ctx, userID, userName)
+	if err != nil {
+		return err
+	}
+
+	// Отправляем пользователю
+	err = h.manager.SendTo(conn, map[string]interface{}{
 		"event": "join_session",
 		"user": map[string]interface{}{
-			"id":         data["user_id"],
-			"name":       data["name"],
-			"session_id": data["session_id"],
+			"id":         userID,
+			"name":       userName,
+			"session_id": sessionID,
 		},
 	})
 	if err != nil {
 		h.log.Error("failed to send join session to user", zap.Any("data", data), zap.Error(err))
+		return err
+	}
+
+	session, err := h.sessionService.GetSessionByID(ctx, sessionID)
+	if err != nil {
+		h.log.Error("failed to get session by id", zap.Any("data", data), zap.Error(err))
+		return err
+	}
+
+	err = h.manager.Broadcast(sessionID, map[string]interface{}{
+		"event": "state_update",
+		"data":  session,
+	})
+	if err != nil {
+		h.log.Error("failed to broadcast session to user", zap.Any("data", data), zap.Error(err))
 		return err
 	}
 
