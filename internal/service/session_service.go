@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
-	"time"
 )
 
 type sessionService struct {
@@ -92,25 +91,40 @@ func (s *sessionService) GetSessionByID(ctx context.Context, sessionId string) (
 		return nil, err
 	}
 
-	votes, err := s.votesRepo.GetBySessionsID(ctx, sessionUUID)
+	sessionDB, err := s.sessionRepo.GetByID(ctx, sessionId)
 	if err != nil {
 		return nil, err
 	}
 
-	userUUID, err := uuid.Parse("623b7dea-b040-4f9c-9eb7-357600a85f4f")
+	users, err := s.sessionRepo.GetUsers(ctx, sessionUUID)
 	if err != nil {
 		return nil, err
 	}
 
-	for range 5 {
-		err := s.votesRepo.SetVoteValue(ctx, sessionUUID, userUUID, "8")
-		if err != nil {
-			return nil, err
-		}
-		time.Sleep(60 * time.Millisecond)
+	votes, err := s.sessionRepo.GetBySessionsID(ctx, sessionUUID)
+	if err != nil {
+		return nil, err
 	}
 
-	fmt.Println(votes)
+	userVotes := make(map[uuid.UUID]string)
+	for _, vote := range votes {
+		userVotes[vote.UserID] = vote.Value
+	}
 
-	return nil, nil
+	var session = &apimodel.Session{
+		ID:            sessionDB.ID,
+		Name:          sessionDB.Name,
+		DeckType:      sessionDB.DeckType,
+		CardsRevealed: sessionDB.CardsRevealed,
+		CreatorID:     sessionDB.CreatorID,
+		CreatorName:   sessionDB.CreatorName,
+		CreatedVia:    sessionDB.CreatedVia,
+		DeckValues:    []string{"1", "2", "3", "5", "8", "13", "?"}, // TODO: нужно будет исправить на динамический маппинг доски
+		Users:         users,
+		Votes:         userVotes,
+	}
+
+	fmt.Println(session)
+
+	return session, nil
 }

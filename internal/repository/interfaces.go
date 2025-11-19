@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"backend_go/internal/model/apimodel"
 	"backend_go/internal/model/entitymodel"
 	"context"
 	"github.com/google/uuid"
@@ -17,11 +18,12 @@ type SessionRepository interface {
 	GetByID(ctx context.Context, sessionId string) (*entitymodel.Session, error)
 	CreateSession(ctx context.Context, session *entitymodel.Session) (*entitymodel.Session, error)
 	DeleteSession(ctx context.Context, sessionId string) error
+	GetUsers(ctx context.Context, sessionID uuid.UUID) ([]apimodel.UsersInSession, error)
+	GetBySessionsID(ctx context.Context, sessionID uuid.UUID) ([]*entitymodel.Vote, error)
 	ConnectUserToSession(ctx context.Context, userID uuid.UUID, sessionID uuid.UUID) error
 	DisconnectUserFromSession(ctx context.Context, userID uuid.UUID, sessionID uuid.UUID) error
 }
 
 type VoteRepository interface {
-	GetBySessionsID(ctx context.Context, sessionID uuid.UUID) ([]*entitymodel.Vote, error)
 	SetVoteValue(ctx context.Context, sessionID uuid.UUID, userID uuid.UUID, vote string) error
 }

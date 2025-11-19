@@ -1,6 +1,9 @@
 package repository
 
 import (
+	"backend_go/internal/model/apimodel"
+	"backend_go/internal/model/converter"
+	"backend_go/internal/model/dbmodel"
 	"backend_go/internal/model/entitymodel"
 	"context"
 	"database/sql"
@@ -169,4 +172,82 @@ func (r *SessionDBRepo) DisconnectUserFromSession(ctx context.Context, userID uu
 	}
 
 	return nil
+}
+
+func (r *SessionDBRepo) GetBySessionsID(ctx context.Context, sessionID uuid.UUID) ([]*entitymodel.Vote, error) {
+	query := `
+	select id, session_id, user_id, value, created_at, updated_at
+	from votes
+	where session_id = $1
+	`
+
+	rows, err := r.db.QueryxContext(ctx, query, sessionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	votes := make([]*entitymodel.Vote, 0)
+	for rows.Next() {
+		var vote entitymodel.Vote
+		err := rows.StructScan(&vote)
+		if err != nil {
+			r.log.Debug("error scan vote", zap.Error(err))
+			return nil, err
+		}
+		votes = append(votes, &vote)
+	}
+
+	if err := rows.Err(); err != nil {
+		r.log.Debug("Err after scan votes", zap.Error(err))
+		return nil, err
+	}
+
+	return votes, nil
+}
+
+func (r *SessionDBRepo) GetUsers(ctx context.Context, sessionID uuid.UUID) ([]apimodel.UsersInSession, error) {
+	query := `
+	select id, name, is_creator, socket_id, created_at, updated_at, 
+	       is_watcher, on_session, email, hashed_password, is_active, is_verified, 
+	       oauth_provider, oauth_id, avatar_url, is_guest
+	from users
+	where id in (select user_id
+				 from session_connections
+				 where session_id = $1)
+	`
+
+	rows, err := r.db.QueryxContext(ctx, query, sessionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	if err := rows.Err(); err != nil {
+		r.log.Debug("error message", zap.Error(err))
+		return nil, err
+	}
+
+	users := make([]*dbmodel.User, 0)
+	for rows.Next() {
+		var user dbmodel.User
+		err := rows.StructScan(&user)
+		if err != nil {
+			r.log.Debug("error scan user", zap.Error(err))
+			return nil, err
+		}
+		users = append(users, &user)
+	}
+
+	if err := rows.Err(); err != nil {
+		r.log.Debug("Err after scan users", zap.Error(err))
+		return nil, err
+	}
+
+	usersEntity := make([]apimodel.UsersInSession, 0, len(users))
+	for _, user := range users {
+		usersEntity = append(usersEntity, converter.UserDBToUserSession(*user))
+	}
+
+	return usersEntity, nil
 }

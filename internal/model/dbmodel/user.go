@@ -1,4 +1,3 @@
-// model/dbmodel/user_response.go
 package dbmodel
 
 import "time"

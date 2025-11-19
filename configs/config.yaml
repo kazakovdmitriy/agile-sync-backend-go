@@ -1,5 +1,5 @@
 environment: development
-log_level: info
+log_level: debug
 
 server:
   addr: :8081

@@ -44,6 +44,23 @@ func UserEntityToAPI(user *entitymodel.User) *apimodel.UserResponse {
 	return apiUser
 }
 
+func UserDBToUserSession(user dbmodel.User) apimodel.UsersInSession {
+	var id uuid.UUID
+	if user.ID != "" {
+		parsedID, err := uuid.Parse(user.ID)
+		if err == nil {
+			id = parsedID
+		}
+	}
+
+	return apimodel.UsersInSession{
+		ID:        id,
+		Name:      user.Name,
+		IsCreator: user.IsCreator,
+		IsWatcher: user.IsWatcher,
+	}
+}
+
 func UserDBToEntity(user *dbmodel.User) *entitymodel.User {
 	if user == nil {
 		return nil
