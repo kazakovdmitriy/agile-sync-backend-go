@@ -23,15 +23,17 @@ func (h *JoinSessionHandler) CanHandle(event string) bool {
 func (h *JoinSessionHandler) Handle(ctx context.Context, conn *websocket.Conn, data map[string]interface{}) error {
 	h.log.Debug("Handle join session", zap.Any("data", data))
 
+	// TODO: Мне не нравится преобразование мапы в строку, нужно сделать типобезопасную конвертацию
 	sessionID := data["session_id"].(string)
 	userID := data["user_id"].(string)
-	userName := data["name"].(string)
+	userName := data["user_name"].(string)
 	//isWatcher := data["is_watcher"].(bool)
 
-	err := h.sessionService.ConnectUserToSession(ctx, userID, userName)
+	err := h.sessionService.ConnectUserToSession(ctx, userID, sessionID)
 	if err != nil {
 		return err
 	}
+	h.manager.Connect(sessionID, conn)
 
 	// Отправляем пользователю
 	err = h.manager.SendTo(conn, map[string]interface{}{
