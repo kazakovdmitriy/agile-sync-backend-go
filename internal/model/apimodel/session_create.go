@@ -1,6 +1,8 @@
 package apimodel
 
+import "backend_go/internal/model"
+
 type SessionCreate struct {
-	Name     string `json:"name"`
-	DeckType string `json:"deck_type"`
+	Name     string         `json:"name"`
+	DeckType model.DeckType `json:"deck_type"`
 }

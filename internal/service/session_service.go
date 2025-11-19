@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend_go/internal/model"
 	"backend_go/internal/model/apimodel"
 	"backend_go/internal/model/entitymodel"
 	"backend_go/internal/repository"
@@ -113,12 +114,10 @@ func (s *sessionService) GetSessionByID(ctx context.Context, sessionId string) (
 		CreatorID:     sessionDB.CreatorID,
 		CreatorName:   sessionDB.CreatorName,
 		CreatedVia:    sessionDB.CreatedVia,
-		DeckValues:    []string{"1", "2", "3", "5", "8", "13", "?"}, // TODO: нужно будет исправить на динамический маппинг доски
+		DeckValues:    model.DeckValues[sessionDB.DeckType],
 		Users:         users,
 		Votes:         userVotes,
 	}
-
-	fmt.Println(session)
 
 	return session, nil
 }
