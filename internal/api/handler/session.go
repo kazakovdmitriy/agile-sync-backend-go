@@ -74,6 +74,17 @@ func (h *SessionHandler) GetUserSession(c *gin.Context) {
 	c.JSON(http.StatusOK, sessions)
 }
 
+func (h *SessionHandler) GetSession(c *gin.Context) {
+	sessionID := c.Param("session_id")
+	_, err := h.sessionService.GetSessionByID(c.Request.Context(), sessionID)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Error getting session"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"session": sessionID})
+}
+
 func (h *SessionHandler) DeleteSession(c *gin.Context) {
 	user, ok := h.getUser(c)
 	if !ok {

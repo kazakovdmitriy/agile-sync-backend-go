@@ -37,11 +37,12 @@ func NewServer(cfg *config.Config, log *zap.Logger) (*Server, error) {
 	// Инициализация репозиториев
 	userDBRepo := repository.NewUserDBRepo(dbconn.DB, log)
 	sessionDBRepo := repository.NewSessionDBRepo(dbconn.DB, log)
+	voteDBRepo := repository.NewVoteDBRepo(dbconn.DB, log)
 
 	// Инициализация сервисов
 	jwtService := service.NewJwtService(cfg, log)
 	authService := service.NewAuthService(userDBRepo, jwtService, log)
-	sessionService := service.NewSessionService(sessionDBRepo, log)
+	sessionService := service.NewSessionService(sessionDBRepo, voteDBRepo, log)
 
 	// Инициализация вебсокета
 	wsManager := websocket.NewWebSocketHandler(cfg, log, sessionService)

@@ -69,6 +69,9 @@ CREATE TABLE public.votes (
                               created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                               updated_at TIMESTAMP WITH TIME ZONE
 );
+
+CREATE UNIQUE INDEX idx_votes_session_user ON public.votes (session_id, user_id);
+
 ALTER TABLE public.votes OWNER TO agile_poker_user;
 
 -- Таблица реакций
