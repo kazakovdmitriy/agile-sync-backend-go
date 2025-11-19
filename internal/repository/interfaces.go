@@ -20,3 +20,8 @@ type SessionRepository interface {
 	ConnectUserToSession(ctx context.Context, userID uuid.UUID, sessionID uuid.UUID) error
 	DisconnectUserFromSession(ctx context.Context, userID uuid.UUID, sessionID uuid.UUID) error
 }
+
+type VoteRepository interface {
+	GetBySessionsID(ctx context.Context, sessionID uuid.UUID) ([]*entitymodel.Vote, error)
+	SetVoteValue(ctx context.Context, sessionID uuid.UUID, userID uuid.UUID, vote string) error
+}

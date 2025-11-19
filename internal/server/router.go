@@ -37,6 +37,7 @@ func setupRouter(
 		sessionGroup.Use(middleware.AuthMiddleware(authService))
 		{
 			sessionGroup.GET("", sessionHandler.GetUserSession)
+			sessionGroup.GET("/:session_id", sessionHandler.GetSession)
 			sessionGroup.POST("", sessionHandler.Create)
 			sessionGroup.DELETE("/:session_id", sessionHandler.DeleteSession)
 		}

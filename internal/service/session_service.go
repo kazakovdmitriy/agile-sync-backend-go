@@ -6,20 +6,25 @@ import (
 	"backend_go/internal/repository"
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
+	"time"
 )
 
 type sessionService struct {
 	sessionRepo repository.SessionRepository
+	votesRepo   repository.VoteRepository
 	log         *zap.Logger
 }
 
 func NewSessionService(
 	sessionRepo repository.SessionRepository,
+	votesRepo repository.VoteRepository,
 	log *zap.Logger,
 ) *sessionService {
 	return &sessionService{
 		sessionRepo: sessionRepo,
+		votesRepo:   votesRepo,
 		log:         log,
 	}
 }
@@ -69,7 +74,6 @@ func (s *sessionService) CreateSession(
 }
 
 func (s *sessionService) DeleteSession(ctx context.Context, sessionId string, userId string) error {
-
 	session, err := s.sessionRepo.GetByID(ctx, sessionId)
 	if err != nil {
 		return err
@@ -80,4 +84,33 @@ func (s *sessionService) DeleteSession(ctx context.Context, sessionId string, us
 	}
 
 	return s.sessionRepo.DeleteSession(ctx, sessionId)
+}
+
+func (s *sessionService) GetSessionByID(ctx context.Context, sessionId string) (*apimodel.Session, error) {
+	sessionUUID, err := uuid.Parse(sessionId)
+	if err != nil {
+		return nil, err
+	}
+
+	votes, err := s.votesRepo.GetBySessionsID(ctx, sessionUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	userUUID, err := uuid.Parse("623b7dea-b040-4f9c-9eb7-357600a85f4f")
+	if err != nil {
+		return nil, err
+	}
+
+	for range 5 {
+		err := s.votesRepo.SetVoteValue(ctx, sessionUUID, userUUID, "8")
+		if err != nil {
+			return nil, err
+		}
+		time.Sleep(60 * time.Millisecond)
+	}
+
+	fmt.Println(votes)
+
+	return nil, nil
 }
