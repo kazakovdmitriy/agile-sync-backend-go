@@ -1,11 +1,14 @@
 package apimodel
 
-import "github.com/google/uuid"
+import (
+	"backend_go/internal/model"
+	"github.com/google/uuid"
+)
 
 type Session struct {
 	ID            uuid.UUID            `json:"id"`
 	Name          string               `json:"name"`
-	DeckType      string               `json:"deck_type"`
+	DeckType      model.DeckType       `json:"deck_type"`
 	CardsRevealed bool                 `json:"cards_revealed"`
 	CreatorID     uuid.UUID            `json:"creator_id"`
 	CreatorName   string               `json:"creator_name"`

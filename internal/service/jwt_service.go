@@ -2,6 +2,7 @@ package service
 
 import (
 	"backend_go/internal/infrastructure/config"
+	"errors"
 	"github.com/golang-jwt/jwt/v4"
 	"go.uber.org/zap"
 	"time"
@@ -21,14 +22,16 @@ func NewJwtService(cfg *config.Config, log *zap.Logger) *jwtService {
 
 // CustomClaims - кастомные claims для нашего приложения
 type CustomClaims struct {
-	UserID string `json:"user_id"`
+	UserID    string `json:"user_id"`
+	TokenType string `json:"token_type"`
 	jwt.RegisteredClaims
 }
 
 func (s *jwtService) GenerateTokenPair(userID string) (map[string]string, error) {
 	// Access Token
 	accessTokenClaims := CustomClaims{
-		UserID: userID,
+		UserID:    userID,
+		TokenType: "access",
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.cfg.GetAccessTokenTTL())),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -46,7 +49,8 @@ func (s *jwtService) GenerateTokenPair(userID string) (map[string]string, error)
 
 	// Refresh Token
 	refreshTokenClaims := CustomClaims{
-		UserID: userID,
+		UserID:    userID,
+		TokenType: "refresh",
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.cfg.GetRefreshTokenTTL())),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -100,6 +104,10 @@ func (s *jwtService) RefreshToken(refreshToken string) (map[string]string, error
 	claims, ok := token.Claims.(*CustomClaims)
 	if !ok || !token.Valid {
 		return nil, jwt.ErrInvalidKey
+	}
+
+	if claims.TokenType != "refresh" {
+		return nil, errors.New("invalid token type")
 	}
 
 	return s.GenerateTokenPair(claims.UserID)

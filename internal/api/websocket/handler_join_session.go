@@ -56,8 +56,8 @@ func (h *JoinSessionHandler) Handle(ctx context.Context, conn *websocket.Conn, d
 	}
 
 	err = h.manager.Broadcast(sessionID, map[string]interface{}{
-		"event": "state_update",
-		"data":  session,
+		"event":   "state_update",
+		"session": session,
 	})
 	if err != nil {
 		h.log.Error("failed to broadcast session to user", zap.Any("data", data), zap.Error(err))
@@ -66,65 +66,3 @@ func (h *JoinSessionHandler) Handle(ctx context.Context, conn *websocket.Conn, d
 
 	return nil
 }
-
-//func (h *JoinSessionHandler) Handle(conn *websocket.Conn, data map[string]interface{}) error {
-//	sessionID, _ := data["session_id"].(string)
-//	userID, _ := data["user_id"].(string)
-//	userName, _ := data["user_name"].(string)
-//
-//	if sessionID == "" || userID == "" {
-//		return errors.New("session_id and user_id are required")
-//	}
-//
-//	// Подключаем к сессии
-//	h.manager.Connect(sessionID, conn)
-//
-//	// Бизнес-логика: создаем/получаем пользователя
-//	//user, err := h.userService.GetOrCreateUser(userID, userName, sessionID)
-//	//if err != nil {
-//	//	return err
-//	//}
-//
-//	// Получаем состояние сессии
-//	sessionState, err := h.getSessionState(sessionID)
-//	if err != nil {
-//		return err
-//	}
-//
-//	// Отправляем состояние сессии клиенту
-//	h.manager.SendTo(conn, map[string]interface{}{
-//		"event": "session_state",
-//		"data":  sessionState,
-//	})
-//
-//	// Уведомляем других участников
-//	h.manager.Broadcast(sessionID, map[string]interface{}{
-//		"event": "user_joined",
-//		"data": map[string]interface{}{
-//			"user_id":    userID,
-//			"user_name":  userName,
-//			"is_watcher": user.IsWatcher,
-//		},
-//	})
-//
-//	return nil
-//}
-
-//func (h *JoinSessionHandler) getSessionState(sessionID string) (map[string]interface{}, error) {
-//	// Здесь получаем состояние сессии из сервисов
-//	// Это примерная реализация
-//	session, err := h.sessionService.GetByID(sessionID)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	users, err := h.userService.GetBySessionID(sessionID)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return map[string]interface{}{
-//		"session": session,
-//		"users":   users,
-//	}, nil
-//}

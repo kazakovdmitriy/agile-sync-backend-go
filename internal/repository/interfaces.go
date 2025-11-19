@@ -20,7 +20,7 @@ type SessionRepository interface {
 	DeleteSession(ctx context.Context, sessionId string) error
 	GetUsers(ctx context.Context, sessionID uuid.UUID) ([]apimodel.UsersInSession, error)
 	GetBySessionsID(ctx context.Context, sessionID uuid.UUID) ([]*entitymodel.Vote, error)
-	ConnectUserToSession(ctx context.Context, userID uuid.UUID, sessionID uuid.UUID) error
+	ConnectUserToSession(ctx context.Context, userID, sessionID uuid.UUID) error
 	DisconnectUserFromSession(ctx context.Context, userID uuid.UUID, sessionID uuid.UUID) error
 }
 

@@ -117,7 +117,7 @@ func (r *SessionDBRepo) DeleteSession(ctx context.Context, sessionId string) err
 	return nil
 }
 
-func (r *SessionDBRepo) ConnectUserToSession(ctx context.Context, userID uuid.UUID, sessionID uuid.UUID) error {
+func (r *SessionDBRepo) ConnectUserToSession(ctx context.Context, userID, sessionID uuid.UUID) error {
 	query := `
 		INSERT INTO session_connections (session_id, user_id)
 		VALUES (:session_id, :user_id)
