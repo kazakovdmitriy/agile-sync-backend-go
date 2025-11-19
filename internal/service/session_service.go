@@ -63,12 +63,6 @@ func (s *sessionService) CreateSession(
 		return nil, err
 	}
 
-	err = s.sessionRepo.ConnectUserToSession(ctx, user.ID, sessionResult.ID)
-	if err != nil {
-		s.log.Error("Failed to connect user to session", zap.Error(err))
-		return nil, err
-	}
-
 	return sessionResult, nil
 }
 
