@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"context"
 	"github.com/gorilla/websocket"
 )
 
@@ -18,7 +19,7 @@ func (h *VoteHandler) CanHandle(event string) bool {
 	return event == "vote"
 }
 
-func (h *VoteHandler) Handle(conn *websocket.Conn, data map[string]interface{}) error {
+func (h *VoteHandler) Handle(ctx context.Context, conn *websocket.Conn, data map[string]interface{}) error {
 	h.log.Info("Handling vote event")
 	return nil
 }

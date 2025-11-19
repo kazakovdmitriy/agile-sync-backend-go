@@ -66,7 +66,7 @@ func (s *sessionService) CreateSession(
 	return sessionResult, nil
 }
 
-func (s *sessionService) DeleteSession(ctx context.Context, sessionId string, userId string) error {
+func (s *sessionService) DeleteSession(ctx context.Context, sessionId, userId string) error {
 	session, err := s.sessionRepo.GetByID(ctx, sessionId)
 	if err != nil {
 		return err
@@ -121,4 +121,18 @@ func (s *sessionService) GetSessionByID(ctx context.Context, sessionId string) (
 	fmt.Println(session)
 
 	return session, nil
+}
+
+func (s *sessionService) ConnectUserToSession(ctx context.Context, userID, sessionID string) error {
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return err
+	}
+
+	sessionUUID, err := uuid.Parse(sessionID)
+	if err != nil {
+		return err
+	}
+
+	return s.sessionRepo.ConnectUserToSession(ctx, userUUID, sessionUUID)
 }
