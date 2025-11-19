@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"github.com/gorilla/websocket"
+	"go.uber.org/zap"
 )
 
 type JoinSessionHandler struct {
@@ -19,7 +20,21 @@ func (h *JoinSessionHandler) CanHandle(event string) bool {
 }
 
 func (h *JoinSessionHandler) Handle(conn *websocket.Conn, data map[string]interface{}) error {
-	h.log.Info("Handle join session")
+	h.log.Debug("Handle join session", zap.Any("data", data))
+
+	err := h.manager.SendTo(conn, map[string]interface{}{
+		"event": "join_session",
+		"user": map[string]interface{}{
+			"id":         data["user_id"],
+			"name":       data["name"],
+			"session_id": data["session_id"],
+		},
+	})
+	if err != nil {
+		h.log.Error("failed to send join session to user", zap.Any("data", data), zap.Error(err))
+		return err
+	}
+
 	return nil
 }
 
