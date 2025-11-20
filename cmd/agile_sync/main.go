@@ -13,6 +13,25 @@ import (
 	"syscall"
 )
 
+/// main.go
+// @title Backend Go API
+// @version 1.0
+// @description API для управления сессиями планирования с системой аутентификации и WebSocket
+// @BasePath /api
+
+// @contact.name Dmitriy Kazakov
+// @contact.email kda94@mail.ru
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description JWT токен в формате: "Bearer {token}"
+
+// @tag.name auth
+// @tag.description Аутентификация и управление пользователями
+
+// @tag.name sessions
+// @tag.description Управление сессиями планирования и голосования
 func main() {
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
