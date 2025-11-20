@@ -208,13 +208,29 @@ func (r *SessionDBRepo) GetBySessionsID(ctx context.Context, sessionID uuid.UUID
 
 func (r *SessionDBRepo) GetUsers(ctx context.Context, sessionID uuid.UUID) ([]apimodel.UsersInSession, error) {
 	query := `
-	select id, name, is_creator, socket_id, created_at, updated_at, 
-	       is_watcher, on_session, email, hashed_password, is_active, is_verified, 
-	       oauth_provider, oauth_id, avatar_url, is_guest
-	from users
-	where id in (select user_id
-				 from session_connections
-				 where session_id = $1)
+	SELECT DISTINCT ON (u.id)
+		u.id,
+		u.name,
+		u.id = s.creator_id AS is_creator,
+		u.socket_id,
+		u.created_at,
+		u.updated_at,
+		u.is_watcher,
+		u.on_session,
+		u.email,
+		u.hashed_password,
+		u.is_active,
+		u.is_verified,
+		u.oauth_provider,
+		u.oauth_id,
+		u.avatar_url,
+		u.is_guest
+	FROM public.users u
+			 JOIN public.session_connections sc ON u.id = sc.user_id
+			 JOIN public.sessions s ON sc.session_id = s.id
+	WHERE sc.session_id = $1
+	  AND sc.disconnected_at IS NULL
+	ORDER BY u.id;
 	`
 
 	rows, err := r.db.QueryxContext(ctx, query, sessionID)
