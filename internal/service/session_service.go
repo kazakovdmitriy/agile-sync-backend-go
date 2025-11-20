@@ -101,6 +101,24 @@ func (s *sessionService) GetSessionByID(ctx context.Context, sessionId string) (
 		return nil, err
 	}
 
+	// Собираем настоящие голоса (user_id → значение)
+	realUserVotes := make(map[uuid.UUID]string)
+	for _, vote := range votes {
+		realUserVotes[vote.UserID] = vote.Value
+	}
+
+	// Определяем, какие голоса отдавать клиенту
+	var clientVotes map[uuid.UUID]string
+	if sessionDB.CardsRevealed {
+		clientVotes = realUserVotes
+	} else {
+		// Карты скрыты — отдаём "hidden" для каждого проголосовавшего
+		clientVotes = make(map[uuid.UUID]string)
+		for userID := range realUserVotes {
+			clientVotes[userID] = "hidden"
+		}
+	}
+
 	userVotes := make(map[uuid.UUID]string)
 	for _, vote := range votes {
 		userVotes[vote.UserID] = vote.Value
@@ -116,7 +134,7 @@ func (s *sessionService) GetSessionByID(ctx context.Context, sessionId string) (
 		CreatedVia:    sessionDB.CreatedVia,
 		DeckValues:    model.DeckValues[sessionDB.DeckType],
 		Users:         users,
-		Votes:         userVotes,
+		Votes:         clientVotes,
 	}
 
 	return session, nil
