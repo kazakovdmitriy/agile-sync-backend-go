@@ -10,13 +10,14 @@ import (
 )
 
 type Config struct {
-	Environment string          `mapstructure:"environment"`
-	LogLevel    string          `mapstructure:"log_level"`
-	Server      ServerConfig    `mapstructure:"server"`
-	Database    DatabaseConfig  `mapstructure:"database"`
-	JWT         JWTConfig       `mapstructure:"jwt"`
-	WebSocket   WebSocketConfig `mapstructure:"websocket"`
-	RateLimit   RateLimitConfig `mapstructure:"rate_limit"`
+	Environment        string          `mapstructure:"environment"`
+	LogLevel           string          `mapstructure:"log_level"`
+	GuestCleanInterval time.Duration   `mapstructure:"guest_clean_interval"`
+	Server             ServerConfig    `mapstructure:"server"`
+	Database           DatabaseConfig  `mapstructure:"database"`
+	JWT                JWTConfig       `mapstructure:"jwt"`
+	WebSocket          WebSocketConfig `mapstructure:"websocket"`
+	RateLimit          RateLimitConfig `mapstructure:"rate_limit"`
 }
 
 func LoadConfig(configPath string) (*Config, error) {
@@ -170,6 +171,7 @@ func setDefaults() {
 	viper.SetDefault("log_level", "info")
 	viper.SetDefault("session.timeout", 30)
 	viper.SetDefault("rate_limit.requests_per_minute", 1000)
+	viper.SetDefault("guest_clean_interval", time.Duration(12)*time.Hour)
 }
 
 func bindEnvVars() {
@@ -212,6 +214,7 @@ func bindEnvVars() {
 	// Other env vars
 	viper.BindEnv("environment", "ENVIRONMENT")
 	viper.BindEnv("log_level", "LOG_LEVEL")
+	viper.BindEnv("guest_clean_interval", "GUEST_CLEAN_INTERVAL")
 	viper.BindEnv("session.timeout", "SESSION_TIMEOUT")
 	viper.BindEnv("rate_limit.requests_per_minute", "RATE_LIMIT")
 }

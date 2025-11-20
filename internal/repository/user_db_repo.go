@@ -104,3 +104,22 @@ func (repo *UserDBRepo) GetByID(ctx context.Context, id uuid.UUID) (*entitymodel
 
 	return converter.UserDBToEntity(&user), nil
 }
+
+// DeleteInactiveGuests удаляет гостевых пользователей, у которых:
+// - последнее подключение было более `inactiveDuration` назад
+func (repo *UserDBRepo) DeleteInactiveGuests(ctx context.Context, duration string) (int64, error) {
+	query := `
+        DELETE FROM users
+		WHERE is_guest = true
+		  AND created_at < NOW() - $1::INTERVAL
+		RETURNING id;
+    `
+
+	result, err := repo.db.ExecContext(ctx, query, duration)
+	if err != nil {
+		return 0, fmt.Errorf("delete inactive guests: %w", err)
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	return rowsAffected, nil
+}

@@ -53,7 +53,7 @@ func setupRouter(
 		}
 	}
 
-	router.GET("/ws", wsManager.HandleWebSocket)
+	router.GET("/ws", middleware.AuthMiddleware(authService), wsManager.HandleWebSocket)
 
 	return router
 }

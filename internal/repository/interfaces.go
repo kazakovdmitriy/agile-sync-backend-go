@@ -11,6 +11,7 @@ type UserRepository interface {
 	Create(ctx context.Context, user *entitymodel.User) (*entitymodel.User, error)
 	GetByEmail(ctx context.Context, email string) (*entitymodel.User, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*entitymodel.User, error)
+	DeleteInactiveGuests(ctx context.Context, duration string) (int64, error)
 }
 
 type SessionRepository interface {

@@ -6,6 +6,7 @@ import (
 	"context"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
+	"time"
 )
 
 type AuthService interface {
@@ -32,4 +33,8 @@ type SessionService interface {
 
 type VoteService interface {
 	SaveVote(ctx context.Context, vote *entitymodel.Vote) (uuid.UUID, error)
+}
+
+type CleanerService interface {
+	Clean(ctx context.Context, inactiveDuration time.Duration) error
 }
