@@ -27,7 +27,7 @@ func NewWebSocketHandler(
 	voteService service.VoteService,
 	// reactionService service.ReactionService,
 ) *WebSocketHandler {
-	manager := NewConnectionManager(cfg)
+	manager := NewConnectionManager(cfg, log)
 
 	// Создаем базовый обработчик с общими зависимостями
 	baseHandler := NewBaseHandler(manager, sessionService, voteService, log)
