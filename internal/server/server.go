@@ -43,9 +43,10 @@ func NewServer(cfg *config.Config, log *zap.Logger) (*Server, error) {
 	jwtService := service.NewJwtService(cfg, log)
 	authService := service.NewAuthService(userDBRepo, jwtService, log)
 	sessionService := service.NewSessionService(sessionDBRepo, voteDBRepo, log)
+	voteService := service.NewVoteService(voteDBRepo, log)
 
 	// Инициализация вебсокета
-	wsManager := websocket.NewWebSocketHandler(cfg, log, sessionService)
+	wsManager := websocket.NewWebSocketHandler(cfg, log, sessionService, voteService)
 
 	// Инициализация хендлеров
 	authHandler := handler.NewAuthHandler(authService, log)

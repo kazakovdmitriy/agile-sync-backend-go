@@ -24,13 +24,13 @@ func NewWebSocketHandler(
 	log *zap.Logger,
 	//userService service.UserService,
 	sessionService service.SessionService,
-	// voteService service.VoteService,
+	voteService service.VoteService,
 	// reactionService service.ReactionService,
 ) *WebSocketHandler {
 	manager := NewConnectionManager(cfg)
 
 	// Создаем базовый обработчик с общими зависимостями
-	baseHandler := NewBaseHandler(manager, sessionService, log)
+	baseHandler := NewBaseHandler(manager, sessionService, voteService, log)
 
 	// Создаем сервис с зарегистрированными обработчиками
 	service := NewWebSocketService(baseHandler, log)

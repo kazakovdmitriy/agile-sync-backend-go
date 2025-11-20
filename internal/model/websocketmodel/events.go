@@ -1,28 +1,31 @@
 package websocketmodel
 
+type SocketEvent string
+type SocketBroadcast string
+
 // События WebSocket
 const (
-	EventJoinSession      = "join_session"
-	EventVote             = "vote"
-	EventRevealCards      = "reveal_cards"
-	EventResetVotes       = "reset_votes"
-	EventSendReaction     = "send_reaction"
-	EventRemoveReaction   = "remove_reaction"
-	EventToggleWatcher    = "toggle_watcher_mode"
-	EventToggleEmoji      = "toggle_emoji"
-	EventToggleAutoReveal = "toggle_auto_reveal"
-	EventChangeUsername   = "change_username"
-	EventKickUser         = "kick_user"
+	EventJoinSession      SocketEvent = "join_session"
+	EventVote             SocketEvent = "vote"
+	EventRevealCards      SocketEvent = "reveal_cards"
+	EventResetVotes       SocketEvent = "reset_votes"
+	EventSendReaction     SocketEvent = "send_reaction"
+	EventRemoveReaction   SocketEvent = "remove_reaction"
+	EventToggleWatcher    SocketEvent = "toggle_watcher_mode"
+	EventToggleEmoji      SocketEvent = "toggle_emoji"
+	EventToggleAutoReveal SocketEvent = "toggle_auto_reveal"
+	EventChangeUsername   SocketEvent = "change_username"
+	EventKickUser         SocketEvent = "kick_user"
 
 	// События broadcast
-	EventSessionState   = "session_state"
-	EventUserJoined     = "user_joined"
-	EventVoteSubmitted  = "vote_submitted"
-	EventCardsRevealed  = "cards_revealed"
-	EventVotesReset     = "votes_reset"
-	EventReactionSent   = "reaction_sent"
-	EventUserUpdated    = "user_updated"
-	EventSessionUpdated = "session_updated"
-	EventUserKicked     = "user_kicked"
-	EventError          = "error"
+	EventSessionState   SocketBroadcast = "session_state"
+	EventUserJoined     SocketBroadcast = "user_joined"
+	EventVoteSubmitted  SocketBroadcast = "vote_submitted"
+	EventCardsRevealed  SocketBroadcast = "cards_revealed"
+	EventVotesReset     SocketBroadcast = "votes_reset"
+	EventReactionSent   SocketBroadcast = "reaction_sent"
+	EventUserUpdated    SocketBroadcast = "user_updated"
+	EventSessionUpdated SocketBroadcast = "state_update"
+	EventUserKicked     SocketBroadcast = "user_kicked"
+	EventError          SocketBroadcast = "error"
 )
