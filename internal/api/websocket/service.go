@@ -38,8 +38,6 @@ func NewWebSocketService(baseHandler *BaseHandler, log *zap.Logger) *WebSocketSe
 
 // RegisterHandler регистрирует обработчик
 func (s *WebSocketService) RegisterHandler(handler EventHandler) {
-	// В реальной реализации обработчик может обрабатывать несколько событий
-	// Для простоты используем карту событие->обработчик
 	if joinHandler, ok := handler.(*JoinSessionHandler); ok {
 		s.handlers["join_session"] = joinHandler
 	} else if voteHandler, ok := handler.(*VoteHandler); ok {
@@ -47,7 +45,7 @@ func (s *WebSocketService) RegisterHandler(handler EventHandler) {
 	} else if revealHandler, ok := handler.(*RevealCardsHandler); ok {
 		s.handlers["reveal_cards"] = revealHandler
 	}
-	// ... другие типы обработчиков
+	// TODO: добавить другие типы обработчиков
 }
 
 // HandleMessage обрабатывает входящее WebSocket сообщение

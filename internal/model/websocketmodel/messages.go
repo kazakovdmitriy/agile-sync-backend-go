@@ -1,6 +1,9 @@
 package websocketmodel
 
-import "backend_go/internal/model/entitymodel"
+import (
+	"backend_go/internal/model/entitymodel"
+	"github.com/google/uuid"
+)
 
 // BaseMessage базовое сообщение WebSocket
 type BaseMessage struct {
@@ -10,15 +13,17 @@ type BaseMessage struct {
 
 // JoinSessionData данные для присоединения к сессии
 type JoinSessionData struct {
-	UserID    string `json:"user_id"`
-	UserName  string `json:"user_name"`
-	IsWatcher bool   `json:"is_watcher"`
+	SessionID uuid.UUID `json:"session_id"`
+	UserID    uuid.UUID `json:"user_id"`
+	UserName  string    `json:"user_name"`
+	IsWatcher *bool     `json:"is_watcher"`
 }
 
 // VoteData данные для голосования
 type VoteData struct {
-	UserID string `json:"user_id"`
-	Value  string `json:"value"`
+	SessionID uuid.UUID `json:"session_id"`
+	UserID    uuid.UUID `json:"user_id"`
+	Value     string    `json:"value"`
 }
 
 // ReactionData данные для реакции

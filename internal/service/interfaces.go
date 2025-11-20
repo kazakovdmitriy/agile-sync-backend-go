@@ -5,6 +5,7 @@ import (
 	"backend_go/internal/model/entitymodel"
 	"context"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 )
 
 type AuthService interface {
@@ -27,4 +28,8 @@ type SessionService interface {
 	DeleteSession(ctx context.Context, sessionId, userId string) error
 	GetSessionByID(ctx context.Context, sessionId string) (*apimodel.Session, error)
 	ConnectUserToSession(ctx context.Context, userID, sessionID string) error
+}
+
+type VoteService interface {
+	SaveVote(ctx context.Context, vote *entitymodel.Vote) (uuid.UUID, error)
 }

@@ -10,7 +10,7 @@ type BaseHandler struct {
 	manager *ConnectionManager
 	//userService     service.UserService
 	sessionService service.SessionService
-	//voteService     service.VoteService
+	voteService    service.VoteService
 	//reactionService service.ReactionService
 	log *zap.Logger
 }
@@ -20,7 +20,7 @@ func NewBaseHandler(
 	manager *ConnectionManager,
 	//userService service.UserService,
 	sessionService service.SessionService,
-	// voteService service.VoteService,
+	voteService service.VoteService,
 	// reactionService service.ReactionService,
 	log *zap.Logger,
 ) *BaseHandler {
@@ -28,7 +28,7 @@ func NewBaseHandler(
 		manager: manager,
 		//userService:     userService,
 		sessionService: sessionService,
-		//voteService:     voteService,
+		voteService:    voteService,
 		//reactionService: reactionService,
 		log: log,
 	}

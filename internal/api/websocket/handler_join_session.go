@@ -1,6 +1,8 @@
 package websocket
 
 import (
+	"backend_go/internal/model/websocketmodel"
+	"backend_go/pkg/utils"
 	"context"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
@@ -21,48 +23,47 @@ func (h *JoinSessionHandler) CanHandle(event string) bool {
 }
 
 func (h *JoinSessionHandler) Handle(ctx context.Context, conn *websocket.Conn, data map[string]interface{}) error {
-	h.log.Debug("Handle join session", zap.Any("data", data))
+	var payload websocketmodel.JoinSessionData
+	if err := utils.MapToStruct(data, &payload); err != nil {
+		h.log.Warn("Invalid join_session payload", zap.Any("data", data), zap.Error(err))
+		return err
+	}
 
-	// TODO: Мне не нравится преобразование мапы в строку, нужно сделать типобезопасную конвертацию
-	sessionID := data["session_id"].(string)
-	userID := data["user_id"].(string)
-	userName := data["user_name"].(string)
-	//isWatcher := data["is_watcher"].(bool)
+	h.log.Debug("Handle join session",
+		zap.String("session_id", payload.SessionID.String()),
+		zap.String("user_id", payload.UserID.String()),
+		zap.String("user_name", payload.UserName),
+		zap.Bool("is_watcher", *payload.IsWatcher),
+	)
 
-	err := h.sessionService.ConnectUserToSession(ctx, userID, sessionID)
+	err := h.sessionService.ConnectUserToSession(ctx, payload.UserID.String(), payload.SessionID.String())
 	if err != nil {
 		return err
 	}
-	h.manager.Connect(sessionID, conn)
+	h.manager.Connect(payload.SessionID.String(), conn)
 
 	// Отправляем пользователю
-	err = h.manager.SendTo(conn, map[string]interface{}{
-		"event": "join_session",
-		"user": map[string]interface{}{
-			"id":         userID,
-			"name":       userName,
-			"session_id": sessionID,
+	response := websocketmodel.BaseMessage{
+		Event: string(websocketmodel.EventJoinSession),
+		Data: map[string]interface{}{
+			"id":         payload.UserID,
+			"name":       payload.UserName,
+			"session_id": payload.SessionID,
 		},
-	})
-	if err != nil {
+	}
+	if err = h.manager.SendTo(conn, response); err != nil {
 		h.log.Error("failed to send join session to user", zap.Any("data", data), zap.Error(err))
 		return err
 	}
 
-	session, err := h.sessionService.GetSessionByID(ctx, sessionID)
+	// Broadcast
+	session, err := h.sessionService.GetSessionByID(ctx, payload.SessionID.String())
 	if err != nil {
-		h.log.Error("failed to get session by id", zap.Any("data", data), zap.Error(err))
 		return err
 	}
-
-	err = h.manager.Broadcast(sessionID, map[string]interface{}{
-		"event":   "state_update",
-		"session": session,
-	})
-	if err != nil {
-		h.log.Error("failed to broadcast session to user", zap.Any("data", data), zap.Error(err))
-		return err
+	broadcast := websocketmodel.BaseMessage{
+		Event: string(websocketmodel.EventSessionUpdated),
+		Data:  session,
 	}
-
-	return nil
+	return h.manager.Broadcast(payload.SessionID.String(), broadcast)
 }
