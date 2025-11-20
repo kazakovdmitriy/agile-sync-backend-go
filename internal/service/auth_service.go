@@ -134,17 +134,19 @@ func (s *AuthServiceImpl) Login(ctx context.Context, req *apimodel.UserLogin) (*
 func (s *AuthServiceImpl) ValidateToken(ctx context.Context, token string) (*entitymodel.User, error) {
 	userIDStr, err := s.jwtService.ExtractUserIDFromToken(token)
 	if err != nil {
+		s.log.Warn("failed to extract user id from token", zap.String("token", token))
 		return nil, err
 	}
 
 	userID, err := uuid.Parse(userIDStr)
 	if err != nil {
-		s.log.Info("failed to parse userID from token", zap.String("token", token))
+		s.log.Warn("failed to parse userID from token", zap.String("token", token))
 		return nil, err
 	}
 
 	user, err := s.userRepo.GetByID(ctx, userID)
 	if err != nil {
+		s.log.Warn("failed to find user by id", zap.String("id", userIDStr), zap.Error(err))
 		return nil, err
 	}
 

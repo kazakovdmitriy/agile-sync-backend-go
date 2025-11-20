@@ -34,7 +34,6 @@ func setupRouter(
 
 		// Session
 		sessionGroup := apiGroup.Group("/sessions")
-		sessionGroup.Use(middleware.AuthMiddleware(authService))
 		{
 			sessionGroup.GET("/:session_id", sessionHandler.GetSession)
 		}
