@@ -36,10 +36,14 @@ func setupRouter(
 		sessionGroup := apiGroup.Group("/sessions")
 		sessionGroup.Use(middleware.AuthMiddleware(authService))
 		{
-			sessionGroup.GET("", sessionHandler.GetUserSession)
 			sessionGroup.GET("/:session_id", sessionHandler.GetSession)
-			sessionGroup.POST("", sessionHandler.Create)
-			sessionGroup.DELETE("/:session_id", sessionHandler.DeleteSession)
+		}
+		sessionGroupProtect := apiGroup.Group("/sessions")
+		sessionGroupProtect.Use(middleware.AuthMiddleware(authService))
+		{
+			sessionGroupProtect.GET("", sessionHandler.GetUserSession)
+			sessionGroupProtect.POST("", sessionHandler.Create)
+			sessionGroupProtect.DELETE("/:session_id", sessionHandler.DeleteSession)
 		}
 	}
 
