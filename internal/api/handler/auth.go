@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"backend_go/internal/infrastructure/config"
 	"backend_go/internal/model/apimodel"
 	"backend_go/internal/model/converter"
 	"backend_go/internal/model/entitymodel"
@@ -13,12 +14,14 @@ import (
 
 type AuthHandler struct {
 	authService service.AuthService
+	cfg         *config.Config
 	log         *zap.Logger
 }
 
-func NewAuthHandler(authService service.AuthService, logger *zap.Logger) *AuthHandler {
+func NewAuthHandler(authService service.AuthService, cfg *config.Config, logger *zap.Logger) *AuthHandler {
 	return &AuthHandler{
 		authService: authService,
+		cfg:         cfg,
 		log:         logger,
 	}
 }
@@ -51,6 +54,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	h.setAuthCookie(c, resp.AccessToken)
+
 	c.JSON(http.StatusOK, resp)
 }
 
@@ -79,6 +84,8 @@ func (h *AuthHandler) GuestLogin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "GuestLogin failure"})
 		return
 	}
+
+	h.setAuthCookie(c, resp.AccessToken)
 
 	c.JSON(http.StatusOK, resp)
 }
@@ -116,6 +123,8 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
+	h.setAuthCookie(c, resp.AccessToken)
+
 	c.JSON(http.StatusOK, resp)
 }
 
@@ -146,4 +155,20 @@ func (h *AuthHandler) Me(c *gin.Context) {
 	userProfile := converter.ToUserProfile(user)
 
 	c.JSON(http.StatusOK, userProfile)
+}
+
+// setAuthCookie устанавливает безопасную аутентификационную куку
+func (h *AuthHandler) setAuthCookie(c *gin.Context, token string) {
+	// Определяем, в продакшене ли мы (для Secure-флага)
+	isSecure := h.cfg.IsProduction()
+
+	c.SetCookie(
+		"auth_token",
+		token,
+		3600,
+		"/",
+		"",
+		isSecure,
+		true,
+	)
 }

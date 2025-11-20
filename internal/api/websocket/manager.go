@@ -10,7 +10,6 @@ import (
 
 // ConnectionManager управляет только WebSocket соединениями
 type ConnectionManager struct {
-	// sessionID -> []*websocket.Conn
 	sessions map[string][]*websocket.Conn
 	mutex    sync.RWMutex
 	upgrader websocket.Upgrader

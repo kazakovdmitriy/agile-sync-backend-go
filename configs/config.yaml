@@ -1,5 +1,6 @@
 environment: development
 log_level: debug
+guest_clean_interval: 1h
 
 server:
   addr: :8081

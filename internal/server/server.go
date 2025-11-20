@@ -8,6 +8,7 @@ import (
 	"backend_go/internal/repository"
 	"backend_go/internal/service"
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
@@ -16,6 +17,7 @@ import (
 
 type Server struct {
 	httpServer *http.Server
+	bgCancel   context.CancelFunc
 	log        *zap.Logger
 }
 
@@ -55,6 +57,10 @@ func NewServer(cfg *config.Config, log *zap.Logger) (*Server, error) {
 	// Настройка роутинга
 	router := setupRouter(wsManager, authHandler, sessionHandler, authService)
 
+	bgCtx, bgCancel := context.WithCancel(context.Background())
+
+	startBackgroundJobs(bgCtx, cfg, userDBRepo, log)
+
 	httpServer := &http.Server{
 		Addr:         cfg.Server.Addr,
 		Handler:      router,
@@ -65,6 +71,7 @@ func NewServer(cfg *config.Config, log *zap.Logger) (*Server, error) {
 	return &Server{
 		httpServer: httpServer,
 		log:        log,
+		bgCancel:   bgCancel,
 	}, nil
 }
 
@@ -74,6 +81,7 @@ func (s *Server) Run() error {
 }
 
 func (s *Server) Shutdown(ctx context.Context) error {
+	s.bgCancel()
 	return s.httpServer.Shutdown(ctx)
 }
 
@@ -85,4 +93,56 @@ func setupGin(cfg *config.Config) {
 	if cfg.IsProduction() {
 		gin.SetMode(gin.ReleaseMode)
 	}
+}
+
+func startBackgroundJobs(ctx context.Context, cfg *config.Config, userRepo repository.UserRepository, log *zap.Logger) {
+	if cfg.GuestCleanInterval <= 0 {
+		log.Info("Guest cleanup disabled (interval <= 0)")
+		return
+	}
+
+	log.Info("Starting guest cleanup job",
+		zap.Duration("interval", cfg.GuestCleanInterval))
+
+	// Первый запуск сразу после старта (опционально)
+	cleanInactiveGuests(ctx, cfg, userRepo, log)
+
+	// Планируем регулярные запуски
+	ticker := time.NewTicker(cfg.GuestCleanInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			cleanInactiveGuests(ctx, cfg, userRepo, log)
+		case <-ctx.Done():
+			log.Info("Stopping background jobs...")
+			return
+		}
+	}
+}
+
+func cleanInactiveGuests(ctx context.Context, cfg *config.Config, userRepo repository.UserRepository, log *zap.Logger) {
+	// Используем контекст для таймаута операции
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	intervalStr := durationToPostgresInterval(cfg.GuestCleanInterval)
+
+	deleted, err := userRepo.DeleteInactiveGuests(ctx, intervalStr)
+	if err != nil {
+		log.Error("Failed to clean inactive guests", zap.Error(err))
+		return
+	}
+
+	if deleted > 0 {
+		log.Info("Cleaned inactive guests", zap.Int64("count", deleted))
+	} else {
+		log.Info("Cleaned inactive guests", zap.Int64("count", 0))
+	}
+}
+
+func durationToPostgresInterval(d time.Duration) string {
+	// Используем total nanoseconds для точности
+	return fmt.Sprintf("%d microseconds", d.Microseconds())
 }
