@@ -2,7 +2,7 @@ package websocket
 
 import (
 	"backend_go/internal/infrastructure/config"
-	"log"
+	"go.uber.org/zap"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -14,10 +14,11 @@ type ConnectionManager struct {
 	sessions map[string][]*websocket.Conn
 	mutex    sync.RWMutex
 	upgrader websocket.Upgrader
+	log      *zap.Logger
 }
 
 // NewConnectionManager создает новый менеджер
-func NewConnectionManager(cfg *config.Config) *ConnectionManager {
+func NewConnectionManager(cfg *config.Config, log *zap.Logger) *ConnectionManager {
 	return &ConnectionManager{
 		sessions: make(map[string][]*websocket.Conn),
 		upgrader: websocket.Upgrader{
@@ -27,6 +28,7 @@ func NewConnectionManager(cfg *config.Config) *ConnectionManager {
 			WriteBufferSize:   cfg.WebSocket.WriteBufferSize,
 			EnableCompression: cfg.WebSocket.EnableCompression,
 		},
+		log: log,
 	}
 }
 
@@ -40,7 +42,11 @@ func (cm *ConnectionManager) Connect(sessionID string, conn *websocket.Conn) {
 	}
 
 	cm.sessions[sessionID] = append(cm.sessions[sessionID], conn)
-	log.Printf("Client connected to session %s. Total connections: %d", sessionID, len(cm.sessions[sessionID]))
+	cm.log.Info(
+		"Client connected to session",
+		zap.String("sessionID", sessionID),
+		zap.Int("total connections", len(cm.sessions[sessionID])),
+	)
 }
 
 // Disconnect отключает соединение от сессии
@@ -64,7 +70,11 @@ func (cm *ConnectionManager) Disconnect(sessionID string, conn *websocket.Conn) 
 		delete(cm.sessions, sessionID)
 	}
 
-	log.Printf("Client disconnected from session %s. Remaining connections: %d", sessionID, len(cm.sessions[sessionID]))
+	cm.log.Info(
+		"Client disconnected from session",
+		zap.String("sessionID", sessionID),
+		zap.Int("total connections", len(cm.sessions[sessionID])),
+	)
 }
 
 // Broadcast рассылает сообщение всем соединениям в сессии
@@ -80,7 +90,7 @@ func (cm *ConnectionManager) Broadcast(sessionID string, message interface{}) er
 	var errors []error
 	for _, conn := range connections {
 		if err := conn.WriteJSON(message); err != nil {
-			log.Printf("Broadcast error: %v", err)
+			cm.log.Error("Broadcast error", zap.Error(err))
 			errors = append(errors, err)
 		}
 	}
