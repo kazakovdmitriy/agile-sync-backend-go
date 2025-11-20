@@ -21,6 +21,19 @@ func NewSessionHandler(sessionService service.SessionService, log *zap.Logger) *
 	}
 }
 
+// Create создание новой сессии голосования
+// @Summary Создать сессию
+// @Description Создание новой сессии для планирования с возможностью голосования
+// @Tags sessions
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param input body apimodel.SessionCreate true "Данные для создания сессии"
+// @Success 201 {object} apimodel.CreateSessionResponse "Сессия успешно создана"
+// @Failure 400 {object} ErrorResponse "Ошибка валидации данных"
+// @Failure 401 {object} ErrorResponse "Не авторизован"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
+// @Router /sessions [post]
 func (h *SessionHandler) Create(c *gin.Context) {
 	var req apimodel.SessionCreate
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -51,6 +64,18 @@ func (h *SessionHandler) Create(c *gin.Context) {
 	)
 }
 
+// GetUserSession получение сессий текущего пользователя
+// @Summary Получить мои сессии
+// @Description Получение списка сессий, созданных текущим пользователем
+// @Tags sessions
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} entitymodel.Session "Список сессий пользователя"
+// @Failure 401 {object} ErrorResponse "Не авторизован"
+// @Failure 403 {object} ErrorResponse "Гостевой пользователь не имеет доступа"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
+// @Router /sessions [get]
 func (h *SessionHandler) GetUserSession(c *gin.Context) {
 	user, ok := h.getUser(c)
 	if !ok {
@@ -74,6 +99,17 @@ func (h *SessionHandler) GetUserSession(c *gin.Context) {
 	c.JSON(http.StatusOK, sessions)
 }
 
+// GetSession получение сессии по ID
+// @Summary Получить сессию по ID
+// @Description Получение информации о конкретной сессии по её идентификатору
+// @Tags sessions
+// @Accept json
+// @Produce json
+// @Param session_id path string true "UUID сессии"
+// @Success 200 {object} entitymodel.Session "Данные сессии"
+// @Failure 404 {object} ErrorResponse "Сессия не найдена"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
+// @Router /sessions/{session_id} [get]
 func (h *SessionHandler) GetSession(c *gin.Context) {
 	sessionID := c.Param("session_id")
 	session, err := h.sessionService.GetSessionByID(c.Request.Context(), sessionID)
@@ -85,6 +121,20 @@ func (h *SessionHandler) GetSession(c *gin.Context) {
 	c.JSON(http.StatusOK, session)
 }
 
+// DeleteSession удаление сессии
+// @Summary Удалить сессию
+// @Description Удаление сессии по ID (только для создателя сессии)
+// @Tags sessions
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param session_id path string true "UUID сессии"
+// @Success 200 {object} apimodel.DeleteSessionResponse "Сессия успешно удалена"
+// @Failure 401 {object} ErrorResponse "Не авторизован"
+// @Failure 403 {object} ErrorResponse "Доступ запрещен (гостевой пользователь или не создатель сессии)"
+// @Failure 404 {object} ErrorResponse "Сессия не найдена"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
+// @Router /sessions/{session_id} [delete]
 func (h *SessionHandler) DeleteSession(c *gin.Context) {
 	user, ok := h.getUser(c)
 	if !ok {
