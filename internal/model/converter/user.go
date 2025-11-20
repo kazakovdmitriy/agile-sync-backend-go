@@ -78,7 +78,7 @@ func UserDBToEntity(user *dbmodel.User) *entitymodel.User {
 	entityUser := &entitymodel.User{
 		ID:             id,
 		Name:           user.Name,
-		Email:          &user.Email,         // Конвертируем string в *string
+		Email:          user.Email,          // Конвертируем string в *string
 		HashedPassword: user.HashedPassword, // Конвертируем string в *string
 		IsActive:       user.IsActive,
 		IsVerified:     user.IsVerified,
@@ -161,8 +161,8 @@ func UserEntityToDB(user *entitymodel.User) *dbmodel.User {
 	dbUser := &dbmodel.User{
 		ID:             id,
 		Name:           user.Name,
-		Email:          *user.Email,         // Конвертируем *string в string
-		HashedPassword: user.HashedPassword, // Конвертируем *string в string
+		Email:          user.Email,
+		HashedPassword: user.HashedPassword,
 		IsActive:       user.IsActive,
 		IsVerified:     user.IsVerified,
 		IsGuest:        user.IsGuest,

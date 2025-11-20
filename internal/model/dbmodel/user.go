@@ -12,7 +12,7 @@ const (
 type User struct {
 	ID             string             `db:"id"`
 	Name           string             `db:"name"`
-	Email          string             `db:"email"`
+	Email          *string            `db:"email"`
 	HashedPassword string             `db:"hashed_password"`
 	IsActive       bool               `db:"is_active"`
 	IsVerified     bool               `db:"is_verified"`

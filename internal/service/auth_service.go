@@ -86,6 +86,7 @@ func (s *AuthServiceImpl) GuestLogin(ctx context.Context, req *apimodel.GuestLog
 
 	createdUser, err := s.userRepo.Create(ctx, &newUser)
 	if err != nil {
+		s.log.Warn("failed to create new guest user", zap.Error(err))
 		return nil, err
 	}
 

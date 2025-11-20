@@ -8,7 +8,7 @@ import (
 type UserProfile struct {
 	Id            uuid.UUID                  `json:"id"`
 	Name          string                     `json:"name"`
-	Email         string                     `json:"email"`
+	Email         *string                    `json:"email"`
 	IsActive      bool                       `json:"is_active"`
 	IsVerified    bool                       `json:"is_verified"`
 	IsGuest       bool                       `json:"is_guest"`
