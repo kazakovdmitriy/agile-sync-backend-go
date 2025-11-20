@@ -51,7 +51,7 @@ func NewServer(cfg *config.Config, log *zap.Logger) (*Server, error) {
 	wsManager := websocket.NewWebSocketHandler(cfg, log, sessionService, voteService)
 
 	// Инициализация хендлеров
-	authHandler := handler.NewAuthHandler(authService, log)
+	authHandler := handler.NewAuthHandler(authService, cfg, log)
 	sessionHandler := handler.NewSessionHandler(sessionService, log)
 
 	// Настройка роутинга
