@@ -23,6 +23,7 @@ type SessionRepository interface {
 	GetBySessionsID(ctx context.Context, sessionID uuid.UUID) ([]*entitymodel.Vote, error)
 	ConnectUserToSession(ctx context.Context, userID, sessionID uuid.UUID) error
 	DisconnectUserFromSession(ctx context.Context, userID uuid.UUID, sessionID uuid.UUID) error
+	RevealCardsInSession(ctx context.Context, sessionID uuid.UUID, isReveal bool) error
 }
 
 type VoteRepository interface {
