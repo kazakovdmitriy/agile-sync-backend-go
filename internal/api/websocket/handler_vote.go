@@ -69,6 +69,17 @@ func (h *VoteHandler) Handle(ctx context.Context, conn *websocket.Conn, data map
 			zap.String("session_id", payload.SessionID.String()))
 	}
 
+	// Broadcast обновлённого состояния сессии (если session != nil)
+	if session != nil {
+		broadcast := websocketmodel.BaseMessage{
+			Event: string(websocketmodel.EventSessionUpdated),
+			Data:  session,
+		}
+		if err := h.manager.Broadcast(payload.SessionID.String(), broadcast); err != nil {
+			h.log.Error("Failed to broadcast session update", zap.Error(err))
+		}
+	}
+
 	// Отправляем подтверждение пользователю
 	response := websocketmodel.BaseMessage{
 		Event: string(websocketmodel.EventVote),
@@ -81,17 +92,6 @@ func (h *VoteHandler) Handle(ctx context.Context, conn *websocket.Conn, data map
 	}
 	if err := h.manager.SendTo(conn, response); err != nil {
 		h.log.Error("Failed to send vote confirmation", zap.Error(err))
-	}
-
-	// Broadcast обновлённого состояния сессии (если session != nil)
-	if session != nil {
-		broadcast := websocketmodel.BaseMessage{
-			Event: string(websocketmodel.EventSessionUpdated),
-			Data:  session,
-		}
-		if err := h.manager.Broadcast(payload.SessionID.String(), broadcast); err != nil {
-			h.log.Error("Failed to broadcast session update", zap.Error(err))
-		}
 	}
 
 	return nil
