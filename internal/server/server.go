@@ -59,7 +59,7 @@ func NewServer(cfg *config.Config, log *zap.Logger) (*Server, error) {
 
 	bgCtx, bgCancel := context.WithCancel(context.Background())
 
-	startBackgroundJobs(bgCtx, cfg, userDBRepo, log)
+	go startBackgroundJobs(bgCtx, cfg, userDBRepo, log)
 
 	httpServer := &http.Server{
 		Addr:         cfg.Server.Addr,
