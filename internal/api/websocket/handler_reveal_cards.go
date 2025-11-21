@@ -18,8 +18,8 @@ func NewRevealCardsHandler(baseHandler *BaseHandler) *RevealCardsHandler {
 	}
 }
 
-func (h *RevealCardsHandler) CanHandle(event string) bool {
-	return event == "reveal_cards"
+func (h *RevealCardsHandler) CanHandle(event websocketmodel.SocketEvent) bool {
+	return event == websocketmodel.EventRevealCards
 }
 
 func (h *RevealCardsHandler) Handle(ctx context.Context, conn *websocket.Conn, data map[string]interface{}) error {

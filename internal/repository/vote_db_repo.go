@@ -38,3 +38,13 @@ func (r *VoteDBRepo) SetVoteValue(ctx context.Context, sessionID uuid.UUID, user
 
 	return voteID, nil
 }
+
+func (r *VoteDBRepo) DeleteVoteInSession(ctx context.Context, sessionID uuid.UUID) error {
+	query := `DELETE FROM votes WHERE session_id = $1;`
+	_, err := r.db.ExecContext(ctx, query, sessionID)
+	if err != nil {
+		r.log.Debug("error deleting vote", zap.Error(err))
+		return err
+	}
+	return nil
+}

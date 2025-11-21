@@ -22,8 +22,8 @@ func NewVoteHandler(baseHandler *BaseHandler) *VoteHandler {
 	}
 }
 
-func (h *VoteHandler) CanHandle(event string) bool {
-	return event == "vote"
+func (h *VoteHandler) CanHandle(event websocketmodel.SocketEvent) bool {
+	return event == websocketmodel.EventVote
 }
 
 func (h *VoteHandler) Handle(ctx context.Context, conn *websocket.Conn, data map[string]interface{}) error {

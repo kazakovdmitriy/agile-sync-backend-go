@@ -7,29 +7,23 @@ import (
 
 // BaseHandler содержит общие зависимости для обработчиков
 type BaseHandler struct {
-	manager *ConnectionManager
-	//userService     service.UserService
+	manager        *ConnectionManager
 	sessionService service.SessionService
 	voteService    service.VoteService
-	//reactionService service.ReactionService
-	log *zap.Logger
+	log            *zap.Logger
 }
 
 // NewBaseHandler создает базовый обработчик
 func NewBaseHandler(
 	manager *ConnectionManager,
-	//userService service.UserService,
 	sessionService service.SessionService,
 	voteService service.VoteService,
-	// reactionService service.ReactionService,
 	log *zap.Logger,
 ) *BaseHandler {
 	return &BaseHandler{
-		manager: manager,
-		//userService:     userService,
+		manager:        manager,
 		sessionService: sessionService,
 		voteService:    voteService,
-		//reactionService: reactionService,
-		log: log,
+		log:            log,
 	}
 }
