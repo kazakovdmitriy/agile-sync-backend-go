@@ -132,6 +132,8 @@ func (s *sessionService) GetSessionByID(ctx context.Context, sessionId string) (
 		CardsRevealed: sessionDB.CardsRevealed,
 		CreatorID:     sessionDB.CreatorID,
 		CreatorName:   sessionDB.CreatorName,
+		AutoReveal:    sessionDB.AutoReveal,
+		AllowEmoji:    sessionDB.AllowEmoji,
 		CreatedVia:    sessionDB.CreatedVia,
 		DeckValues:    model.DeckValues[sessionDB.DeckType],
 		Users:         users,
