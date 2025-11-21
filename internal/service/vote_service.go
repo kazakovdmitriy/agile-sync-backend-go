@@ -23,3 +23,7 @@ func NewVoteService(voteRepository repository.VoteRepository, log *zap.Logger) *
 func (s *voteService) SaveVote(ctx context.Context, vote *entitymodel.Vote) (uuid.UUID, error) {
 	return s.voteRepository.SetVoteValue(ctx, vote.SessionID, vote.UserID, vote.Value)
 }
+
+func (s *voteService) DeleteVoteInSession(ctx context.Context, sessionID uuid.UUID) error {
+	return s.voteRepository.DeleteVoteInSession(ctx, sessionID)
+}

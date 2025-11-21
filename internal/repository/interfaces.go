@@ -28,4 +28,5 @@ type SessionRepository interface {
 
 type VoteRepository interface {
 	SetVoteValue(ctx context.Context, sessionID uuid.UUID, userID uuid.UUID, vote string) (uuid.UUID, error)
+	DeleteVoteInSession(ctx context.Context, sessionID uuid.UUID) error
 }

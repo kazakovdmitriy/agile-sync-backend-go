@@ -18,8 +18,8 @@ func NewJoinSessionHandler(baseHandler *BaseHandler) *JoinSessionHandler {
 	}
 }
 
-func (h *JoinSessionHandler) CanHandle(event string) bool {
-	return event == "join_session"
+func (h *JoinSessionHandler) CanHandle(event websocketmodel.SocketEvent) bool {
+	return event == websocketmodel.EventJoinSession
 }
 
 func (h *JoinSessionHandler) Handle(ctx context.Context, conn *websocket.Conn, data map[string]interface{}) error {

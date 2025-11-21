@@ -33,4 +33,5 @@ type SessionService interface {
 
 type VoteService interface {
 	SaveVote(ctx context.Context, vote *entitymodel.Vote) (uuid.UUID, error)
+	DeleteVoteInSession(ctx context.Context, sessionID uuid.UUID) error
 }

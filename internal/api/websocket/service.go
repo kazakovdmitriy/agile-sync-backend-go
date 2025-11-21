@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"backend_go/internal/model/websocketmodel"
 	"context"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
@@ -15,7 +16,7 @@ type WebSocketService struct {
 // EventHandler интерфейс для обработчиков событий
 type EventHandler interface {
 	Handle(ctx context.Context, conn *websocket.Conn, data map[string]interface{}) error
-	CanHandle(event string) bool
+	CanHandle(event websocketmodel.SocketEvent) bool
 }
 
 // NewWebSocketService создает новый сервис
@@ -29,9 +30,7 @@ func NewWebSocketService(baseHandler *BaseHandler, log *zap.Logger) *WebSocketSe
 	service.RegisterHandler(NewJoinSessionHandler(baseHandler))
 	service.RegisterHandler(NewVoteHandler(baseHandler))
 	service.RegisterHandler(NewRevealCardsHandler(baseHandler))
-	//service.RegisterHandler(sockethandlers.NewResetVotesHandler(baseHandler))
-	//service.RegisterHandler(sockethandlers.NewReactionHandler(baseHandler))
-	// ... другие обработчики
+	service.RegisterHandler(NewResetVotesHandler(baseHandler))
 
 	return service
 }
@@ -44,12 +43,18 @@ func (s *WebSocketService) RegisterHandler(handler EventHandler) {
 		s.handlers["vote"] = voteHandler
 	} else if revealHandler, ok := handler.(*RevealCardsHandler); ok {
 		s.handlers["reveal_cards"] = revealHandler
+	} else if resetHandler, ok := handler.(*ResetVotesHandler); ok {
+		s.handlers["reset_votes"] = resetHandler
 	}
 	// TODO: добавить другие типы обработчиков
 }
 
 // HandleMessage обрабатывает входящее WebSocket сообщение
-func (s *WebSocketService) HandleMessage(ctx context.Context, conn *websocket.Conn, data map[string]interface{}) error {
+func (s *WebSocketService) HandleMessage(
+	ctx context.Context,
+	conn *websocket.Conn,
+	data map[string]interface{},
+) error {
 	event, ok := data["event"].(string)
 	if !ok {
 		return s.sendError(conn, "event field is required")
