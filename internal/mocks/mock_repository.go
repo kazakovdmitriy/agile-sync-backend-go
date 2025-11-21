@@ -202,7 +202,7 @@ func (mr *MockSessionRepositoryMockRecorder) GetByID(ctx, sessionId any) *gomock
 // GetBySessionsID mocks base method.
 func (m *MockSessionRepository) GetBySessionsID(ctx context.Context, sessionID uuid.UUID) ([]*entitymodel.Vote, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBySessionsID", ctx, sessionID)
+	ret := m.ctrl.Call(m, "GetVotesInSessions", ctx, sessionID)
 	ret0, _ := ret[0].([]*entitymodel.Vote)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -211,7 +211,7 @@ func (m *MockSessionRepository) GetBySessionsID(ctx context.Context, sessionID u
 // GetBySessionsID indicates an expected call of GetBySessionsID.
 func (mr *MockSessionRepositoryMockRecorder) GetBySessionsID(ctx, sessionID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBySessionsID", reflect.TypeOf((*MockSessionRepository)(nil).GetBySessionsID), ctx, sessionID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVotesInSessions", reflect.TypeOf((*MockSessionRepository)(nil).GetBySessionsID), ctx, sessionID)
 }
 
 // GetUsers mocks base method.

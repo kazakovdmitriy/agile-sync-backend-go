@@ -2,7 +2,7 @@ package websocket
 
 import (
 	"backend_go/internal/model/websocketmodel"
-	"backend_go/pkg/utils"
+	"backend_go/internal/utils"
 	"context"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"

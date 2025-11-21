@@ -174,38 +174,6 @@ func (r *SessionDBRepo) DisconnectUserFromSession(ctx context.Context, userID uu
 	return nil
 }
 
-func (r *SessionDBRepo) GetBySessionsID(ctx context.Context, sessionID uuid.UUID) ([]*entitymodel.Vote, error) {
-	query := `
-	select id, session_id, user_id, value, created_at, updated_at
-	from votes
-	where session_id = $1
-	`
-
-	rows, err := r.db.QueryxContext(ctx, query, sessionID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	votes := make([]*entitymodel.Vote, 0)
-	for rows.Next() {
-		var vote entitymodel.Vote
-		err := rows.StructScan(&vote)
-		if err != nil {
-			r.log.Debug("error scan vote", zap.Error(err))
-			return nil, err
-		}
-		votes = append(votes, &vote)
-	}
-
-	if err := rows.Err(); err != nil {
-		r.log.Debug("Err after scan votes", zap.Error(err))
-		return nil, err
-	}
-
-	return votes, nil
-}
-
 func (r *SessionDBRepo) GetUsers(ctx context.Context, sessionID uuid.UUID) ([]apimodel.UsersInSession, error) {
 	query := `
 	SELECT DISTINCT ON (u.id)

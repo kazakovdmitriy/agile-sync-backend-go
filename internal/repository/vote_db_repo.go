@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"backend_go/internal/model/entitymodel"
 	"context"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -47,4 +48,36 @@ func (r *VoteDBRepo) DeleteVoteInSession(ctx context.Context, sessionID uuid.UUI
 		return err
 	}
 	return nil
+}
+
+func (r *VoteDBRepo) GetVotesInSessions(ctx context.Context, sessionID uuid.UUID) ([]entitymodel.Vote, error) {
+	query := `
+	select id, session_id, user_id, value, created_at, updated_at
+	from votes
+	where session_id = $1
+	`
+
+	rows, err := r.db.QueryxContext(ctx, query, sessionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	votes := make([]entitymodel.Vote, 0)
+	for rows.Next() {
+		var vote entitymodel.Vote
+		err := rows.StructScan(&vote)
+		if err != nil {
+			r.log.Debug("error scan vote", zap.Error(err))
+			return nil, err
+		}
+		votes = append(votes, vote)
+	}
+
+	if err := rows.Err(); err != nil {
+		r.log.Debug("Err after scan votes", zap.Error(err))
+		return nil, err
+	}
+
+	return votes, nil
 }

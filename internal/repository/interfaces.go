@@ -20,7 +20,6 @@ type SessionRepository interface {
 	CreateSession(ctx context.Context, session *entitymodel.Session) (*entitymodel.Session, error)
 	DeleteSession(ctx context.Context, sessionId string) error
 	GetUsers(ctx context.Context, sessionID uuid.UUID) ([]apimodel.UsersInSession, error)
-	GetBySessionsID(ctx context.Context, sessionID uuid.UUID) ([]*entitymodel.Vote, error)
 	ConnectUserToSession(ctx context.Context, userID, sessionID uuid.UUID) error
 	DisconnectUserFromSession(ctx context.Context, userID uuid.UUID, sessionID uuid.UUID) error
 	RevealCardsInSession(ctx context.Context, sessionID uuid.UUID, isReveal bool) error
@@ -29,4 +28,5 @@ type SessionRepository interface {
 type VoteRepository interface {
 	SetVoteValue(ctx context.Context, sessionID uuid.UUID, userID uuid.UUID, vote string) (uuid.UUID, error)
 	DeleteVoteInSession(ctx context.Context, sessionID uuid.UUID) error
+	GetVotesInSessions(ctx context.Context, sessionID uuid.UUID) ([]entitymodel.Vote, error)
 }
