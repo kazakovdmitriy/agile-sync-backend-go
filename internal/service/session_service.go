@@ -5,6 +5,7 @@ import (
 	"backend_go/internal/model/apimodel"
 	"backend_go/internal/model/entitymodel"
 	"backend_go/internal/repository"
+	"backend_go/internal/utils"
 	"context"
 	"fmt"
 	"github.com/google/uuid"
@@ -96,7 +97,7 @@ func (s *sessionService) GetSessionByID(ctx context.Context, sessionId string) (
 		return nil, err
 	}
 
-	votes, err := s.sessionRepo.GetBySessionsID(ctx, sessionUUID)
+	votes, err := s.votesRepo.GetVotesInSessions(ctx, sessionUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -135,6 +136,10 @@ func (s *sessionService) GetSessionByID(ctx context.Context, sessionId string) (
 		DeckValues:    model.DeckValues[sessionDB.DeckType],
 		Users:         users,
 		Votes:         clientVotes,
+	}
+
+	if sessionDB.CardsRevealed {
+		session.MostCommonVote = utils.FindMostPopularVote(votes, sessionDB.DeckType)
 	}
 
 	return session, nil

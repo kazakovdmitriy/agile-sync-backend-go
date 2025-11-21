@@ -3,7 +3,7 @@ package websocket
 import (
 	"backend_go/internal/model/entitymodel"
 	"backend_go/internal/model/websocketmodel"
-	"backend_go/pkg/utils"
+	"backend_go/internal/utils"
 	"context"
 	"errors"
 	"fmt"
