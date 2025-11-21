@@ -19,6 +19,11 @@ type JoinSessionData struct {
 	IsWatcher *bool     `json:"is_watcher"`
 }
 
+// RevealCardsData данные открытия карт в сессии
+type RevealCardsData struct {
+	SessionID uuid.UUID `json:"session_id"`
+}
+
 // VoteData данные для голосования
 type VoteData struct {
 	SessionID uuid.UUID `json:"session_id"`

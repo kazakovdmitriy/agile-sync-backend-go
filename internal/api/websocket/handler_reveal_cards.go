@@ -1,8 +1,11 @@
 package websocket
 
 import (
+	"backend_go/internal/model/websocketmodel"
+	"backend_go/pkg/utils"
 	"context"
 	"github.com/gorilla/websocket"
+	"go.uber.org/zap"
 )
 
 type RevealCardsHandler struct {
@@ -20,45 +23,27 @@ func (h *RevealCardsHandler) CanHandle(event string) bool {
 }
 
 func (h *RevealCardsHandler) Handle(ctx context.Context, conn *websocket.Conn, data map[string]interface{}) error {
-	h.log.Info("Handling reveal card event")
-	return nil
-}
+	var payload websocketmodel.RevealCardsData
+	if err := utils.MapToStruct(data, &payload); err != nil {
+		h.log.Warn("Invalid reveal cards payload", zap.Any("data", data), zap.Error(err))
+		return err
+	}
 
-//func (h *RevealCardsHandler) Handle(conn *websocket.Conn, data map[string]interface{}) error {
-//	sessionID, _ := data["session_id"].(string)
-//	userID, _ := data["user_id"].(string)
-//
-//	if sessionID == "" {
-//		return errors.New("session_id is required")
-//	}
-//
-//	// Проверяем права
-//	session, err := h.sessionService.GetByID(sessionID)
-//	if err != nil {
-//		return err
-//	}
-//
-//	if session.CreatorID != userID {
-//		return errors.New("only session creator can reveal cards")
-//	}
-//
-//	// Обновляем сессию
-//	if err := h.sessionService.RevealCards(sessionID); err != nil {
-//		return err
-//	}
-//
-//	// Получаем голоса и рассылаем
-//	votes, err := h.voteService.GetBySessionID(sessionID)
-//	if err != nil {
-//		return err
-//	}
-//
-//	h.manager.Broadcast(sessionID, map[string]interface{}{
-//		"event": "cards_revealed",
-//		"data": map[string]interface{}{
-//			"votes": votes,
-//		},
-//	})
-//
-//	return nil
-//}
+	err := h.sessionService.RevealCardsInSession(ctx, payload.SessionID, true)
+	if err != nil {
+		h.log.Warn("Invalid reveal cards session", zap.Error(err))
+		return err
+	}
+
+	session, err := h.sessionService.GetSessionByID(ctx, payload.SessionID.String())
+	if err != nil {
+		h.log.Warn("GetSessionByID", zap.Error(err))
+		return err
+	}
+
+	broadcast := websocketmodel.BaseMessage{
+		Event: string(websocketmodel.EventSessionUpdated),
+		Data:  session,
+	}
+	return h.manager.Broadcast(payload.SessionID.String(), broadcast)
+}

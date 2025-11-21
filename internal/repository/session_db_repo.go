@@ -267,3 +267,36 @@ func (r *SessionDBRepo) GetUsers(ctx context.Context, sessionID uuid.UUID) ([]ap
 
 	return usersEntity, nil
 }
+
+func (r *SessionDBRepo) RevealCardsInSession(ctx context.Context, sessionID uuid.UUID, isReveal bool) error {
+	query := `
+	UPDATE sessions
+	SET cards_revealed = $1,
+		updated_at = NOW()
+	WHERE
+		id = $2
+	RETURNING id;
+	`
+
+	var id uuid.UUID
+	err := r.db.QueryRowContext(ctx, query, isReveal, sessionID).Scan(&id)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			r.log.Debug("No active connection to disconnect",
+				zap.Bool("cards_revealed", isReveal),
+				zap.String("session_id", sessionID.String()),
+			)
+			return nil
+		}
+
+		r.log.Error("Failed to disconnect user from session",
+			zap.Bool("cards_revealed", isReveal),
+			zap.String("session_id", sessionID.String()),
+			zap.Error(err),
+		)
+		return fmt.Errorf("db update failed: %w", err)
+	}
+
+	return nil
+}

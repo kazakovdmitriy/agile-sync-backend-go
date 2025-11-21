@@ -153,3 +153,7 @@ func (s *sessionService) ConnectUserToSession(ctx context.Context, userID, sessi
 
 	return s.sessionRepo.ConnectUserToSession(ctx, userUUID, sessionUUID)
 }
+
+func (s *sessionService) RevealCardsInSession(ctx context.Context, sessionId uuid.UUID, isReveal bool) error {
+	return s.sessionRepo.RevealCardsInSession(ctx, sessionId, isReveal)
+}
