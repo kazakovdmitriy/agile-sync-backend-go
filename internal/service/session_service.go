@@ -3,6 +3,7 @@ package service
 import (
 	"backend_go/internal/model"
 	"backend_go/internal/model/apimodel"
+	"backend_go/internal/model/converter"
 	"backend_go/internal/model/entitymodel"
 	"backend_go/internal/repository"
 	"backend_go/internal/utils"
@@ -36,13 +37,25 @@ func NewSessionService(
 func (s *sessionService) GetUserSession(
 	ctx context.Context,
 	userId string,
-) ([]*entitymodel.Session, error) {
+) ([]apimodel.UserSessions, error) {
 	sessions, err := s.sessionRepo.GetByCreator(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
 
-	return sessions, nil
+	usersInSession, err := s.sessionRepo.GetCountUsersInUserSessions(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	response := make([]apimodel.UserSessions, 0)
+	for _, session := range sessions {
+		usersCount := usersInSession[session.ID]
+		apiSession := converter.SessionToUserSession(&session, usersCount)
+		response = append(response, *apiSession)
+	}
+
+	return response, nil
 }
 
 func (s *sessionService) CreateSession(

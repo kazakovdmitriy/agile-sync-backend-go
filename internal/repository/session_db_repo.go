@@ -70,7 +70,7 @@ func (r *SessionDBRepo) GetByID(ctx context.Context, sessionId string) (*entitym
 	return &sessionResult, nil
 }
 
-func (r *SessionDBRepo) GetByCreator(ctx context.Context, userId string) ([]*entitymodel.Session, error) {
+func (r *SessionDBRepo) GetByCreator(ctx context.Context, userId string) ([]entitymodel.Session, error) {
 	query := `
 	select id, name, deck_type, cards_revealed, 
 	       creator_id, creator_name, created_at, 
@@ -85,14 +85,14 @@ func (r *SessionDBRepo) GetByCreator(ctx context.Context, userId string) ([]*ent
 	}
 	defer rows.Close()
 
-	sessions := make([]*entitymodel.Session, 0)
+	sessions := make([]entitymodel.Session, 0)
 	for rows.Next() {
 		var session entitymodel.Session
 		if err := rows.StructScan(&session); err != nil {
 			r.log.Debug("error message", zap.Error(err))
 			return nil, err
 		}
-		sessions = append(sessions, &session)
+		sessions = append(sessions, session)
 	}
 
 	if err := rows.Err(); err != nil {
@@ -101,6 +101,41 @@ func (r *SessionDBRepo) GetByCreator(ctx context.Context, userId string) ([]*ent
 	}
 
 	return sessions, nil
+}
+
+func (r *SessionDBRepo) GetCountUsersInUserSessions(ctx context.Context, userId string) (map[uuid.UUID]int, error) {
+	query := `
+	SELECT
+		s.id AS session_id,
+		COUNT(DISTINCT sc.user_id) AS connected_users_count
+	FROM sessions s
+			 LEFT JOIN session_connections sc ON s.id = sc.session_id
+		AND sc.disconnected_at IS NULL
+	WHERE s.creator_id = $1
+	GROUP BY s.id;
+	`
+
+	rows, err := r.db.QueryxContext(ctx, query, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	userInSessions := make(map[uuid.UUID]int)
+	for rows.Next() {
+		var session dbmodel.UsersInSessions
+		if err := rows.StructScan(&session); err != nil {
+			r.log.Debug("error message", zap.Error(err))
+			return nil, err
+		}
+		userInSessions[session.SessionUUID] = session.UsesCount
+	}
+
+	if err := rows.Err(); err != nil {
+		r.log.Debug("error message", zap.Error(err))
+		return nil, err
+	}
+	return userInSessions, nil
 }
 
 func (r *SessionDBRepo) DeleteSession(ctx context.Context, sessionId string) error {
