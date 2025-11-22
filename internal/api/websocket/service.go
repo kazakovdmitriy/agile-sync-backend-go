@@ -32,6 +32,7 @@ func NewWebSocketService(baseHandler *BaseHandler, log *zap.Logger) *WebSocketSe
 	service.RegisterHandler(NewRevealCardsHandler(baseHandler))
 	service.RegisterHandler(NewResetVotesHandler(baseHandler))
 	service.RegisterHandler(NewKickUserHandler(baseHandler))
+	service.RegisterHandler(NewAutoRevealHandler(baseHandler))
 
 	return service
 }
@@ -48,6 +49,8 @@ func (s *WebSocketService) RegisterHandler(handler EventHandler) {
 		s.handlers["reset_votes"] = resetHandler
 	} else if kickHandler, ok := handler.(*KickUserHandler); ok {
 		s.handlers["kick_user"] = kickHandler
+	} else if autoRevealHandler, ok := handler.(*AutoRevealHandler); ok {
+		s.handlers["toggle_auto_reveal"] = autoRevealHandler
 	}
 	// TODO: добавить другие типы обработчиков
 }
