@@ -2,10 +2,10 @@ package server
 
 import (
 	_ "backend_go/docs"
+	"backend_go/internal/api"
 	"backend_go/internal/api/handler"
 	"backend_go/internal/api/middleware"
 	"backend_go/internal/api/websocket"
-	"backend_go/internal/service"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -15,7 +15,7 @@ func setupRouter(
 	wsManager *websocket.WebSocketHandler,
 	authHandler *handler.AuthHandler,
 	sessionHandler *handler.SessionHandler,
-	authService service.AuthService,
+	authService api.AuthService,
 ) *gin.Engine {
 	router := gin.Default()
 

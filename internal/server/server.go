@@ -96,7 +96,7 @@ func setupGin(cfg *config.Config) {
 	}
 }
 
-func startBackgroundJobs(ctx context.Context, cfg *config.Config, userRepo repository.UserRepository, log *zap.Logger) {
+func startBackgroundJobs(ctx context.Context, cfg *config.Config, userRepo service.UserRepository, log *zap.Logger) {
 	if cfg.GuestCleanInterval <= 0 {
 		log.Info("Guest cleanup disabled (interval <= 0)")
 		return
@@ -123,7 +123,7 @@ func startBackgroundJobs(ctx context.Context, cfg *config.Config, userRepo repos
 	}
 }
 
-func cleanInactiveGuests(ctx context.Context, cfg *config.Config, userRepo repository.UserRepository, log *zap.Logger) {
+func cleanInactiveGuests(ctx context.Context, cfg *config.Config, userRepo service.UserRepository, log *zap.Logger) {
 	// Используем контекст для таймаута операции
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()

@@ -1,8 +1,8 @@
 package websocket
 
 import (
+	"backend_go/internal/api"
 	"backend_go/internal/infrastructure/config"
-	"backend_go/internal/service"
 	"go.uber.org/zap"
 	"time"
 
@@ -14,7 +14,7 @@ import (
 type WebSocketHandler struct {
 	manager        *ConnectionManager
 	service        *WebSocketService
-	sessionService service.SessionService
+	sessionService api.SessionService
 	config         *config.Config
 	log            *zap.Logger
 }
@@ -23,9 +23,9 @@ type WebSocketHandler struct {
 func NewWebSocketHandler(
 	cfg *config.Config,
 	log *zap.Logger,
-	userService service.UserService,
-	sessionService service.SessionService,
-	voteService service.VoteService,
+	userService api.UserService,
+	sessionService api.SessionService,
+	voteService api.VoteService,
 ) *WebSocketHandler {
 	manager := NewConnectionManager(cfg, log)
 

@@ -1,25 +1,25 @@
 package websocket
 
 import (
-	"backend_go/internal/service"
+	"backend_go/internal/api"
 	"go.uber.org/zap"
 )
 
 // BaseHandler содержит общие зависимости для обработчиков
 type BaseHandler struct {
 	manager        *ConnectionManager
-	sessionService service.SessionService
-	voteService    service.VoteService
-	userService    service.UserService
+	sessionService api.SessionService
+	voteService    api.VoteService
+	userService    api.UserService
 	log            *zap.Logger
 }
 
 // NewBaseHandler создает базовый обработчик
 func NewBaseHandler(
 	manager *ConnectionManager,
-	sessionService service.SessionService,
-	voteService service.VoteService,
-	userService service.UserService,
+	sessionService api.SessionService,
+	voteService api.VoteService,
+	userService api.UserService,
 	log *zap.Logger,
 ) *BaseHandler {
 	return &BaseHandler{

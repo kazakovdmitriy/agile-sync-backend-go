@@ -4,39 +4,32 @@ import (
 	"backend_go/internal/model/apimodel"
 	"backend_go/internal/model/entitymodel"
 	"context"
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )
 
-type AuthService interface {
-	Register(ctx context.Context, req *apimodel.UserRegister) (*apimodel.TokenResponse, error)
-	GuestLogin(ctx context.Context, req *apimodel.GuestLogin) (*apimodel.TokenResponse, error)
-	Login(ctx context.Context, req *apimodel.UserLogin) (*apimodel.TokenResponse, error)
-	ValidateToken(ctx context.Context, token string) (*entitymodel.User, error)
+type UserRepository interface {
+	Create(ctx context.Context, user *entitymodel.User) (*entitymodel.User, error)
+	GetByEmail(ctx context.Context, email string) (*entitymodel.User, error)
+	GetByID(ctx context.Context, id uuid.UUID) (*entitymodel.User, error)
+	DeleteInactiveGuests(ctx context.Context, duration string) (int64, error)
+	SetOnSession(ctx context.Context, id uuid.UUID, onSession bool) error
 }
 
-type JWTService interface {
-	GenerateTokenPair(userID string) (map[string]string, error)
-	ValidateToken(tokenString string) (*jwt.Token, error)
-	ExtractUserIDFromToken(tokenString string) (string, error)
-	RefreshToken(refreshToken string) (map[string]string, error)
+type SessionRepository interface {
+	GetByCreator(ctx context.Context, userId string) ([]entitymodel.Session, error)
+	GetCountUsersInUserSessions(ctx context.Context, userId string) (map[uuid.UUID]int, error)
+	GetByID(ctx context.Context, sessionId string) (*entitymodel.Session, error)
+	CreateSession(ctx context.Context, session *entitymodel.Session) (*entitymodel.Session, error)
+	DeleteSession(ctx context.Context, sessionId string) error
+	GetUsers(ctx context.Context, sessionID uuid.UUID) ([]apimodel.UsersInSession, error)
+	ConnectUser(ctx context.Context, userID, sessionID uuid.UUID) error
+	DisconnectUser(ctx context.Context, userID uuid.UUID, sessionID uuid.UUID) error
+	RevealCardsInSession(ctx context.Context, sessionID uuid.UUID, isReveal bool) error
+	AutoRevealCardsInSession(ctx context.Context, sessionID uuid.UUID) error
 }
 
-type SessionService interface {
-	GetUserSession(ctx context.Context, userId string) ([]apimodel.UserSessions, error)
-	CreateSession(ctx context.Context, sessions *apimodel.SessionCreate, user *entitymodel.User) (*entitymodel.Session, error)
-	DeleteSession(ctx context.Context, sessionId, userId string) error
-	GetSessionByID(ctx context.Context, sessionId string) (*apimodel.Session, error)
-	ConnectUser(ctx context.Context, userID, sessionID string) error
-	DisconnectUser(ctx context.Context, userID, sessionID string) error
-	RevealCardsInSession(ctx context.Context, sessionId uuid.UUID, isReveal bool) error
-}
-
-type UserService interface {
-	GetUser(ctx context.Context, userID uuid.UUID) (*entitymodel.User, error)
-}
-
-type VoteService interface {
-	SaveVote(ctx context.Context, vote *entitymodel.Vote) (uuid.UUID, error)
+type VoteRepository interface {
+	SetVoteValue(ctx context.Context, sessionID uuid.UUID, userID uuid.UUID, vote string) (uuid.UUID, error)
 	DeleteVoteInSession(ctx context.Context, sessionID uuid.UUID) error
+	GetVotesInSessions(ctx context.Context, sessionID uuid.UUID) ([]entitymodel.Vote, error)
 }

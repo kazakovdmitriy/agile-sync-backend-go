@@ -8,13 +8,13 @@ import (
 	"time"
 )
 
-type jwtService struct {
+type JwtService struct {
 	cfg *config.Config
 	log *zap.Logger
 }
 
-func NewJwtService(cfg *config.Config, log *zap.Logger) *jwtService {
-	return &jwtService{
+func NewJwtService(cfg *config.Config, log *zap.Logger) *JwtService {
+	return &JwtService{
 		cfg: cfg,
 		log: log,
 	}
@@ -27,7 +27,7 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func (s *jwtService) GenerateTokenPair(userID string) (map[string]string, error) {
+func (s *JwtService) GenerateTokenPair(userID string) (map[string]string, error) {
 	// Access Token
 	accessTokenClaims := CustomClaims{
 		UserID:    userID,
@@ -73,7 +73,7 @@ func (s *jwtService) GenerateTokenPair(userID string) (map[string]string, error)
 	}, nil
 }
 
-func (s *jwtService) ValidateToken(tokenString string) (*jwt.Token, error) {
+func (s *JwtService) ValidateToken(tokenString string) (*jwt.Token, error) {
 	return jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, jwt.ErrSignatureInvalid
@@ -82,7 +82,7 @@ func (s *jwtService) ValidateToken(tokenString string) (*jwt.Token, error) {
 	})
 }
 
-func (s *jwtService) ExtractUserIDFromToken(tokenString string) (string, error) {
+func (s *JwtService) ExtractUserIDFromToken(tokenString string) (string, error) {
 	token, err := s.ValidateToken(tokenString)
 	if err != nil {
 		return "", err
@@ -95,7 +95,7 @@ func (s *jwtService) ExtractUserIDFromToken(tokenString string) (string, error) 
 	return "", jwt.ErrInvalidKey
 }
 
-func (s *jwtService) RefreshToken(refreshToken string) (map[string]string, error) {
+func (s *JwtService) RefreshToken(refreshToken string) (map[string]string, error) {
 	token, err := s.ValidateToken(refreshToken)
 	if err != nil {
 		return nil, err

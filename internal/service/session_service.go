@@ -5,7 +5,6 @@ import (
 	"backend_go/internal/model/apimodel"
 	"backend_go/internal/model/converter"
 	"backend_go/internal/model/entitymodel"
-	"backend_go/internal/repository"
 	"backend_go/internal/utils"
 	"context"
 	"fmt"
@@ -13,20 +12,20 @@ import (
 	"go.uber.org/zap"
 )
 
-type sessionService struct {
-	sessionRepo repository.SessionRepository
-	votesRepo   repository.VoteRepository
-	userRepo    repository.UserRepository
+type SessionService struct {
+	sessionRepo SessionRepository
+	votesRepo   VoteRepository
+	userRepo    UserRepository
 	log         *zap.Logger
 }
 
 func NewSessionService(
-	sessionRepo repository.SessionRepository,
-	votesRepo repository.VoteRepository,
-	userRepo repository.UserRepository,
+	sessionRepo SessionRepository,
+	votesRepo VoteRepository,
+	userRepo UserRepository,
 	log *zap.Logger,
-) *sessionService {
-	return &sessionService{
+) *SessionService {
+	return &SessionService{
 		sessionRepo: sessionRepo,
 		votesRepo:   votesRepo,
 		userRepo:    userRepo,
@@ -34,7 +33,7 @@ func NewSessionService(
 	}
 }
 
-func (s *sessionService) GetUserSession(
+func (s *SessionService) GetUserSession(
 	ctx context.Context,
 	userId string,
 ) ([]apimodel.UserSessions, error) {
@@ -58,7 +57,7 @@ func (s *sessionService) GetUserSession(
 	return response, nil
 }
 
-func (s *sessionService) CreateSession(
+func (s *SessionService) CreateSession(
 	ctx context.Context,
 	sessionCreate *apimodel.SessionCreate,
 	user *entitymodel.User,
@@ -84,7 +83,7 @@ func (s *sessionService) CreateSession(
 	return sessionResult, nil
 }
 
-func (s *sessionService) DeleteSession(ctx context.Context, sessionId, userId string) error {
+func (s *SessionService) DeleteSession(ctx context.Context, sessionId, userId string) error {
 	session, err := s.sessionRepo.GetByID(ctx, sessionId)
 	if err != nil {
 		return err
@@ -97,7 +96,7 @@ func (s *sessionService) DeleteSession(ctx context.Context, sessionId, userId st
 	return s.sessionRepo.DeleteSession(ctx, sessionId)
 }
 
-func (s *sessionService) GetSessionByID(ctx context.Context, sessionId string) (*apimodel.Session, error) {
+func (s *SessionService) GetSessionByID(ctx context.Context, sessionId string) (*apimodel.Session, error) {
 	sessionUUID, err := uuid.Parse(sessionId)
 	if err != nil {
 		return nil, err
@@ -163,7 +162,7 @@ func (s *sessionService) GetSessionByID(ctx context.Context, sessionId string) (
 	return session, nil
 }
 
-func (s *sessionService) ConnectUser(ctx context.Context, userID, sessionID string) error {
+func (s *SessionService) ConnectUser(ctx context.Context, userID, sessionID string) error {
 	userUUID, err := uuid.Parse(userID)
 	if err != nil {
 		return err
@@ -182,7 +181,7 @@ func (s *sessionService) ConnectUser(ctx context.Context, userID, sessionID stri
 	return s.sessionRepo.ConnectUser(ctx, userUUID, sessionUUID)
 }
 
-func (s *sessionService) DisconnectUser(ctx context.Context, userID, sessionID string) error {
+func (s *SessionService) DisconnectUser(ctx context.Context, userID, sessionID string) error {
 	userUUID, err := uuid.Parse(userID)
 	if err != nil {
 		return err
@@ -201,6 +200,10 @@ func (s *sessionService) DisconnectUser(ctx context.Context, userID, sessionID s
 	return s.sessionRepo.DisconnectUser(ctx, userUUID, sessionUUID)
 }
 
-func (s *sessionService) RevealCardsInSession(ctx context.Context, sessionId uuid.UUID, isReveal bool) error {
+func (s *SessionService) RevealCardsInSession(ctx context.Context, sessionId uuid.UUID, isReveal bool) error {
 	return s.sessionRepo.RevealCardsInSession(ctx, sessionId, isReveal)
+}
+
+func (s *SessionService) AutoRevealCardsInSession(ctx context.Context, sessionId uuid.UUID) error {
+	return s.sessionRepo.AutoRevealCardsInSession(ctx, sessionId)
 }
