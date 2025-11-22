@@ -38,6 +38,13 @@ type ReactionData struct {
 	Emoji      string `json:"emoji"`
 }
 
+// KickUserData данные для удаления
+type KickUserData struct {
+	SessionID       uuid.UUID  `json:"session_id"`
+	InitiatorUserID *uuid.UUID `json:"user_id"`
+	TargetUser      *uuid.UUID `json:"target_user_id"`
+}
+
 // SessionStateResponse состояние сессии
 type SessionStateResponse struct {
 	Session   *entitymodel.Session    `json:"session"`

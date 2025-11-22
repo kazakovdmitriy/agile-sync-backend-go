@@ -16,16 +16,10 @@ const (
 	EventToggleAutoReveal SocketEvent = "toggle_auto_reveal"
 	EventChangeUsername   SocketEvent = "change_username"
 	EventKickUser         SocketEvent = "kick_user"
+	EventKickUserError    SocketEvent = "kick_user_error"
+	EventUserKicked       SocketEvent = "user_kicked"
 
 	// События broadcast
-	EventSessionState   SocketBroadcast = "session_state"
-	EventUserJoined     SocketBroadcast = "user_joined"
-	EventVoteSubmitted  SocketBroadcast = "vote_submitted"
-	EventCardsRevealed  SocketBroadcast = "cards_revealed"
-	EventVotesReset     SocketBroadcast = "votes_reset"
-	EventReactionSent   SocketBroadcast = "reaction_sent"
-	EventUserUpdated    SocketBroadcast = "user_updated"
-	EventSessionUpdated SocketBroadcast = "state_update"
-	EventUserKicked     SocketBroadcast = "user_kicked"
-	EventError          SocketBroadcast = "error"
+	EventSessionUpdated      SocketBroadcast = "state_update"
+	EventUserKickedBroadcast SocketBroadcast = "user_kicked_broadcast"
 )

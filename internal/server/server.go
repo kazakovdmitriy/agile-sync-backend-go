@@ -44,11 +44,12 @@ func NewServer(cfg *config.Config, log *zap.Logger) (*Server, error) {
 	// Инициализация сервисов
 	jwtService := service.NewJwtService(cfg, log)
 	authService := service.NewAuthService(userDBRepo, jwtService, log)
-	sessionService := service.NewSessionService(sessionDBRepo, voteDBRepo, log)
+	userService := service.NewUserService(userDBRepo, log)
+	sessionService := service.NewSessionService(sessionDBRepo, voteDBRepo, userDBRepo, log)
 	voteService := service.NewVoteService(voteDBRepo, log)
 
 	// Инициализация вебсокета
-	wsManager := websocket.NewWebSocketHandler(cfg, log, sessionService, voteService)
+	wsManager := websocket.NewWebSocketHandler(cfg, log, userService, sessionService, voteService)
 
 	// Инициализация хендлеров
 	authHandler := handler.NewAuthHandler(authService, cfg, log)

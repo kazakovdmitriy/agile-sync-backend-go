@@ -123,3 +123,20 @@ func (repo *UserDBRepo) DeleteInactiveGuests(ctx context.Context, duration strin
 	rowsAffected, _ := result.RowsAffected()
 	return rowsAffected, nil
 }
+
+func (repo *UserDBRepo) SetOnSession(ctx context.Context, id uuid.UUID, onSession bool) error {
+	query := `
+	UPDATE users
+	SET on_session = $1,
+		updated_at = NOW()
+	WHERE 
+		id = $2;
+	`
+
+	_, err := repo.db.ExecContext(ctx, query, onSession, id)
+	if err != nil {
+		return fmt.Errorf("set on session: %w", err)
+	}
+
+	return nil
+}

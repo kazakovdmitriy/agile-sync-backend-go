@@ -115,7 +115,7 @@ func (m *MockSessionRepository) EXPECT() *MockSessionRepositoryMockRecorder {
 // ConnectUserToSession mocks base method.
 func (m *MockSessionRepository) ConnectUserToSession(ctx context.Context, userID, sessionID uuid.UUID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ConnectUserToSession", ctx, userID, sessionID)
+	ret := m.ctrl.Call(m, "ConnectUser", ctx, userID, sessionID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
@@ -123,7 +123,7 @@ func (m *MockSessionRepository) ConnectUserToSession(ctx context.Context, userID
 // ConnectUserToSession indicates an expected call of ConnectUserToSession.
 func (mr *MockSessionRepositoryMockRecorder) ConnectUserToSession(ctx, userID, sessionID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConnectUserToSession", reflect.TypeOf((*MockSessionRepository)(nil).ConnectUserToSession), ctx, userID, sessionID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConnectUser", reflect.TypeOf((*MockSessionRepository)(nil).ConnectUserToSession), ctx, userID, sessionID)
 }
 
 // CreateSession mocks base method.
@@ -158,7 +158,7 @@ func (mr *MockSessionRepositoryMockRecorder) DeleteSession(ctx, sessionId any) *
 // DisconnectUserFromSession mocks base method.
 func (m *MockSessionRepository) DisconnectUserFromSession(ctx context.Context, userID, sessionID uuid.UUID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DisconnectUserFromSession", ctx, userID, sessionID)
+	ret := m.ctrl.Call(m, "DisconnectUser", ctx, userID, sessionID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
@@ -166,7 +166,7 @@ func (m *MockSessionRepository) DisconnectUserFromSession(ctx context.Context, u
 // DisconnectUserFromSession indicates an expected call of DisconnectUserFromSession.
 func (mr *MockSessionRepositoryMockRecorder) DisconnectUserFromSession(ctx, userID, sessionID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DisconnectUserFromSession", reflect.TypeOf((*MockSessionRepository)(nil).DisconnectUserFromSession), ctx, userID, sessionID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DisconnectUser", reflect.TypeOf((*MockSessionRepository)(nil).DisconnectUserFromSession), ctx, userID, sessionID)
 }
 
 // GetByCreator mocks base method.
