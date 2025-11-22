@@ -36,7 +36,7 @@ func (h *JoinSessionHandler) Handle(ctx context.Context, conn *websocket.Conn, d
 		zap.Bool("is_watcher", *payload.IsWatcher),
 	)
 
-	err := h.sessionService.ConnectUserToSession(ctx, payload.UserID.String(), payload.SessionID.String())
+	err := h.sessionService.ConnectUser(ctx, payload.UserID.String(), payload.SessionID.String())
 	if err != nil {
 		return err
 	}

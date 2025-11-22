@@ -215,7 +215,7 @@ func (m *MockSessionService) EXPECT() *MockSessionServiceMockRecorder {
 // ConnectUserToSession mocks base method.
 func (m *MockSessionService) ConnectUserToSession(ctx context.Context, userID, sessionID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ConnectUserToSession", ctx, userID, sessionID)
+	ret := m.ctrl.Call(m, "ConnectUser", ctx, userID, sessionID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
@@ -223,7 +223,7 @@ func (m *MockSessionService) ConnectUserToSession(ctx context.Context, userID, s
 // ConnectUserToSession indicates an expected call of ConnectUserToSession.
 func (mr *MockSessionServiceMockRecorder) ConnectUserToSession(ctx, userID, sessionID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConnectUserToSession", reflect.TypeOf((*MockSessionService)(nil).ConnectUserToSession), ctx, userID, sessionID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConnectUser", reflect.TypeOf((*MockSessionService)(nil).ConnectUserToSession), ctx, userID, sessionID)
 }
 
 // CreateSession mocks base method.

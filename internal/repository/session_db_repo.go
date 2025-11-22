@@ -117,13 +117,12 @@ func (r *SessionDBRepo) DeleteSession(ctx context.Context, sessionId string) err
 	return nil
 }
 
-func (r *SessionDBRepo) ConnectUserToSession(ctx context.Context, userID, sessionID uuid.UUID) error {
+func (r *SessionDBRepo) ConnectUser(ctx context.Context, userID, sessionID uuid.UUID) error {
 	query := `
 		INSERT INTO session_connections (session_id, user_id)
 		VALUES (:session_id, :user_id)
 	`
 
-	// Используем NamedExec для безопасной вставки
 	_, err := r.db.NamedExecContext(ctx, query, map[string]interface{}{
 		"session_id": sessionID,
 		"user_id":    userID,
@@ -140,7 +139,7 @@ func (r *SessionDBRepo) ConnectUserToSession(ctx context.Context, userID, sessio
 	return nil
 }
 
-func (r *SessionDBRepo) DisconnectUserFromSession(ctx context.Context, userID uuid.UUID, sessionID uuid.UUID) error {
+func (r *SessionDBRepo) DisconnectUser(ctx context.Context, userID uuid.UUID, sessionID uuid.UUID) error {
 	query := `
 		UPDATE session_connections
 		SET disconnected_at = NOW()

@@ -22,15 +22,14 @@ type WebSocketHandler struct {
 func NewWebSocketHandler(
 	cfg *config.Config,
 	log *zap.Logger,
-	//userService service.UserService,
+	userService service.UserService,
 	sessionService service.SessionService,
 	voteService service.VoteService,
-	// reactionService service.ReactionService,
 ) *WebSocketHandler {
 	manager := NewConnectionManager(cfg, log)
 
 	// Создаем базовый обработчик с общими зависимостями
-	baseHandler := NewBaseHandler(manager, sessionService, voteService, log)
+	baseHandler := NewBaseHandler(manager, sessionService, voteService, userService, log)
 
 	// Создаем сервис с зарегистрированными обработчиками
 	service := NewWebSocketService(baseHandler, log)

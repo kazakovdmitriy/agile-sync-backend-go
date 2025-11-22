@@ -15,17 +15,20 @@ import (
 type sessionService struct {
 	sessionRepo repository.SessionRepository
 	votesRepo   repository.VoteRepository
+	userRepo    repository.UserRepository
 	log         *zap.Logger
 }
 
 func NewSessionService(
 	sessionRepo repository.SessionRepository,
 	votesRepo repository.VoteRepository,
+	userRepo repository.UserRepository,
 	log *zap.Logger,
 ) *sessionService {
 	return &sessionService{
 		sessionRepo: sessionRepo,
 		votesRepo:   votesRepo,
+		userRepo:    userRepo,
 		log:         log,
 	}
 }
@@ -147,7 +150,7 @@ func (s *sessionService) GetSessionByID(ctx context.Context, sessionId string) (
 	return session, nil
 }
 
-func (s *sessionService) ConnectUserToSession(ctx context.Context, userID, sessionID string) error {
+func (s *sessionService) ConnectUser(ctx context.Context, userID, sessionID string) error {
 	userUUID, err := uuid.Parse(userID)
 	if err != nil {
 		return err
@@ -158,7 +161,31 @@ func (s *sessionService) ConnectUserToSession(ctx context.Context, userID, sessi
 		return err
 	}
 
-	return s.sessionRepo.ConnectUserToSession(ctx, userUUID, sessionUUID)
+	err = s.userRepo.SetOnSession(ctx, userUUID, true)
+	if err != nil {
+		return err
+	}
+
+	return s.sessionRepo.ConnectUser(ctx, userUUID, sessionUUID)
+}
+
+func (s *sessionService) DisconnectUser(ctx context.Context, userID, sessionID string) error {
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return err
+	}
+
+	sessionUUID, err := uuid.Parse(sessionID)
+	if err != nil {
+		return err
+	}
+
+	err = s.userRepo.SetOnSession(ctx, userUUID, false)
+	if err != nil {
+		return err
+	}
+
+	return s.sessionRepo.DisconnectUser(ctx, userUUID, sessionUUID)
 }
 
 func (s *sessionService) RevealCardsInSession(ctx context.Context, sessionId uuid.UUID, isReveal bool) error {

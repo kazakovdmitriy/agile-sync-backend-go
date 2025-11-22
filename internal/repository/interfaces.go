@@ -12,6 +12,7 @@ type UserRepository interface {
 	GetByEmail(ctx context.Context, email string) (*entitymodel.User, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*entitymodel.User, error)
 	DeleteInactiveGuests(ctx context.Context, duration string) (int64, error)
+	SetOnSession(ctx context.Context, id uuid.UUID, onSession bool) error
 }
 
 type SessionRepository interface {
@@ -20,8 +21,8 @@ type SessionRepository interface {
 	CreateSession(ctx context.Context, session *entitymodel.Session) (*entitymodel.Session, error)
 	DeleteSession(ctx context.Context, sessionId string) error
 	GetUsers(ctx context.Context, sessionID uuid.UUID) ([]apimodel.UsersInSession, error)
-	ConnectUserToSession(ctx context.Context, userID, sessionID uuid.UUID) error
-	DisconnectUserFromSession(ctx context.Context, userID uuid.UUID, sessionID uuid.UUID) error
+	ConnectUser(ctx context.Context, userID, sessionID uuid.UUID) error
+	DisconnectUser(ctx context.Context, userID uuid.UUID, sessionID uuid.UUID) error
 	RevealCardsInSession(ctx context.Context, sessionID uuid.UUID, isReveal bool) error
 }
 
