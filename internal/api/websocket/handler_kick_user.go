@@ -41,7 +41,7 @@ func (h *KickUserHandler) Handle(ctx context.Context, conn *websocket.Conn, data
 		return err
 	}
 
-	if session.CreatorID != *payload.TargetUser {
+	if session.CreatorID != *payload.InitiatorUserID {
 		response := map[string]interface{}{
 			"event":   websocketmodel.EventKickUserError,
 			"message": "Только создатель сессии может удалять пользователей",
@@ -51,6 +51,8 @@ func (h *KickUserHandler) Handle(ctx context.Context, conn *websocket.Conn, data
 			h.log.Warn("Failed to send message", zap.Error(err))
 			return err
 		}
+
+		return nil
 	}
 
 	kickedUser, err := h.userService.GetUser(ctx, *payload.TargetUser)
