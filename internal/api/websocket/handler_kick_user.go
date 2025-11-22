@@ -61,6 +61,12 @@ func (h *KickUserHandler) Handle(ctx context.Context, conn *websocket.Conn, data
 		return err
 	}
 
+	err = h.sessionService.DisconnectUser(ctx, kickedUser.ID.String(), payload.SessionID.String())
+	if err != nil {
+		h.log.Warn("Failed to disconnect kicked user", zap.Error(err))
+		return err
+	}
+
 	response := map[string]interface{}{
 		"event":            websocketmodel.EventUserKickedBroadcast,
 		"kicked_user_id":   payload.TargetUser.String(),
