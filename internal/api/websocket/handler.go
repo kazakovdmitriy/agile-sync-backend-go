@@ -60,7 +60,6 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 	h.configureConnection(conn)
 
 	var sessionID string
-	var userID string
 	done := make(chan struct{})
 
 	// Запускаем ping handler
@@ -83,13 +82,10 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 			h.log.Error("WebSocket error", zap.Error(err))
 		}
 
-		// Сохраняем sessionID и userID для disconnect
+		// Сохраняем sessionID для disconnect
 		if event, _ := data["event"].(string); event == "join_session" {
 			if sid, ok := data["session_id"].(string); ok {
 				sessionID = sid
-			}
-			if uid, ok := data["user_id"].(string); ok {
-				userID = uid
 			}
 		}
 	}
@@ -98,10 +94,11 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 
 	// Отключаем от сессии при закрытии соединения
 	if sessionID != "" {
+		userID, hasUserID := h.manager.GetUserIDByConnection(conn)
 		h.manager.Disconnect(sessionID, conn)
 
 		// Если есть userID, обновляем состояние в БД и отправляем state_update
-		if userID != "" {
+		if hasUserID && userID != "" {
 			h.log.Info("User disconnected, updating session state",
 				zap.String("userID", userID),
 				zap.String("sessionID", sessionID),
@@ -114,27 +111,31 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 					zap.String("sessionID", sessionID),
 					zap.Error(err),
 				)
-			}
-
-			// Отправляем обновленное состояние сессии остальным пользователям
-			session, err := h.sessionService.GetSessionByID(c.Request.Context(), sessionID)
-			if err != nil {
-				h.log.Warn("Failed to get session for state update",
-					zap.String("sessionID", sessionID),
-					zap.Error(err),
-				)
 			} else {
-				broadcast := map[string]interface{}{
-					"event": "state_update",
-					"data":  session,
-				}
-				if err := h.manager.Broadcast(sessionID, broadcast); err != nil {
-					h.log.Warn("Failed to broadcast state update",
+				// Отправляем обновленное состояние сессии остальным пользователям
+				session, err := h.sessionService.GetSessionByID(c.Request.Context(), sessionID)
+				if err != nil {
+					h.log.Warn("Failed to get session for state update",
 						zap.String("sessionID", sessionID),
 						zap.Error(err),
 					)
+				} else {
+					broadcast := map[string]interface{}{
+						"event": "state_update",
+						"data":  session,
+					}
+					if err := h.manager.Broadcast(sessionID, broadcast); err != nil {
+						h.log.Warn("Failed to broadcast state update",
+							zap.String("sessionID", sessionID),
+							zap.Error(err),
+						)
+					}
 				}
 			}
+		} else {
+			h.log.Warn("User disconnected but userID not found in connection mapping",
+				zap.String("sessionID", sessionID),
+			)
 		}
 	}
 }

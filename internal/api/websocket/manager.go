@@ -12,6 +12,7 @@ import (
 type ConnectionManager struct {
 	sessions        map[string][]*websocket.Conn
 	userConnections map[string]*websocket.Conn
+	connToUser      map[*websocket.Conn]string
 	mutex           sync.RWMutex
 	upgrader        websocket.Upgrader
 	log             *zap.Logger
@@ -22,6 +23,7 @@ func NewConnectionManager(cfg *config.Config, log *zap.Logger) *ConnectionManage
 	return &ConnectionManager{
 		sessions:        make(map[string][]*websocket.Conn),
 		userConnections: make(map[string]*websocket.Conn),
+		connToUser:      make(map[*websocket.Conn]string),
 		upgrader: websocket.Upgrader{
 			CheckOrigin:       checkOrigin(cfg),
 			HandshakeTimeout:  cfg.WebSocket.HandshakeTimeout,
@@ -55,12 +57,14 @@ func (cm *ConnectionManager) ConnectUser(userID string, conn *websocket.Conn) {
 	cm.mutex.Lock()
 	defer cm.mutex.Unlock()
 
-	// Если у пользователя уже было соединение, закрываем старое
+	// Если у пользователя уже было соединение, удаляем старое из маппинга
 	if oldConn, exists := cm.userConnections[userID]; exists && oldConn != conn {
 		cm.log.Info("Replacing existing connection for user", zap.String("userID", userID))
+		delete(cm.connToUser, oldConn)
 	}
 
 	cm.userConnections[userID] = conn
+	cm.connToUser[conn] = userID
 	cm.log.Info("User connected", zap.String("userID", userID))
 }
 
@@ -69,8 +73,20 @@ func (cm *ConnectionManager) DisconnectUser(userID string) {
 	cm.mutex.Lock()
 	defer cm.mutex.Unlock()
 
+	if conn, exists := cm.userConnections[userID]; exists {
+		delete(cm.connToUser, conn)
+	}
 	delete(cm.userConnections, userID)
 	cm.log.Info("User disconnected", zap.String("userID", userID))
+}
+
+// GetUserIDByConnection возвращает userID по соединению
+func (cm *ConnectionManager) GetUserIDByConnection(conn *websocket.Conn) (string, bool) {
+	cm.mutex.RLock()
+	defer cm.mutex.RUnlock()
+
+	userID, exists := cm.connToUser[conn]
+	return userID, exists
 }
 
 // Disconnect отключает соединение от сессии
@@ -94,12 +110,10 @@ func (cm *ConnectionManager) Disconnect(sessionID string, conn *websocket.Conn) 
 		delete(cm.sessions, sessionID)
 	}
 
-	for userID, userConn := range cm.userConnections {
-		if userConn == conn {
-			delete(cm.userConnections, userID)
-			cm.log.Info("Removed user connection mapping", zap.String("userID", userID))
-			break
-		}
+	if userID, exists := cm.connToUser[conn]; exists {
+		delete(cm.userConnections, userID)
+		delete(cm.connToUser, conn)
+		cm.log.Info("Removed user connection mapping", zap.String("userID", userID))
 	}
 
 	cm.log.Info(
