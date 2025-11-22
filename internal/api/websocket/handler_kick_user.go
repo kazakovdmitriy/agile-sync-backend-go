@@ -67,6 +67,14 @@ func (h *KickUserHandler) Handle(ctx context.Context, conn *websocket.Conn, data
 		return err
 	}
 
+	kickedResponse := map[string]interface{}{
+		"event":   websocketmodel.EventKicked,
+		"message": "Вы были удалены из сессии",
+	}
+	if err := h.manager.SendToUser(payload.TargetUser.String(), kickedResponse); err != nil {
+		h.log.Warn("Failed to send kicked event to user", zap.Error(err))
+	}
+
 	response := map[string]interface{}{
 		"event":            websocketmodel.EventUserKickedBroadcast,
 		"kicked_user_id":   payload.TargetUser.String(),
@@ -76,6 +84,8 @@ func (h *KickUserHandler) Handle(ctx context.Context, conn *websocket.Conn, data
 		h.log.Warn("Failed to send message", zap.Error(err))
 		return err
 	}
+
+	h.manager.DisconnectUser(payload.TargetUser.String())
 
 	session, err = h.sessionService.GetSessionByID(ctx, payload.SessionID.String())
 	if err != nil {

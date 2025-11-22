@@ -41,6 +41,7 @@ func (h *JoinSessionHandler) Handle(ctx context.Context, conn *websocket.Conn, d
 		return err
 	}
 	h.manager.Connect(payload.SessionID.String(), conn)
+	h.manager.ConnectUser(payload.UserID.String(), conn)
 
 	// Отправляем пользователю
 	response := websocketmodel.BaseMessage{

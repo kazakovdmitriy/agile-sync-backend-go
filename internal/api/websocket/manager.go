@@ -10,16 +10,18 @@ import (
 
 // ConnectionManager управляет только WebSocket соединениями
 type ConnectionManager struct {
-	sessions map[string][]*websocket.Conn
-	mutex    sync.RWMutex
-	upgrader websocket.Upgrader
-	log      *zap.Logger
+	sessions        map[string][]*websocket.Conn
+	userConnections map[string]*websocket.Conn
+	mutex           sync.RWMutex
+	upgrader        websocket.Upgrader
+	log             *zap.Logger
 }
 
 // NewConnectionManager создает новый менеджер
 func NewConnectionManager(cfg *config.Config, log *zap.Logger) *ConnectionManager {
 	return &ConnectionManager{
-		sessions: make(map[string][]*websocket.Conn),
+		sessions:        make(map[string][]*websocket.Conn),
+		userConnections: make(map[string]*websocket.Conn),
 		upgrader: websocket.Upgrader{
 			CheckOrigin:       checkOrigin(cfg),
 			HandshakeTimeout:  cfg.WebSocket.HandshakeTimeout,
@@ -48,6 +50,29 @@ func (cm *ConnectionManager) Connect(sessionID string, conn *websocket.Conn) {
 	)
 }
 
+// ConnectUser связывает пользователя с соединением
+func (cm *ConnectionManager) ConnectUser(userID string, conn *websocket.Conn) {
+	cm.mutex.Lock()
+	defer cm.mutex.Unlock()
+
+	// Если у пользователя уже было соединение, закрываем старое
+	if oldConn, exists := cm.userConnections[userID]; exists && oldConn != conn {
+		cm.log.Info("Replacing existing connection for user", zap.String("userID", userID))
+	}
+
+	cm.userConnections[userID] = conn
+	cm.log.Info("User connected", zap.String("userID", userID))
+}
+
+// DisconnectUser отключает пользователя
+func (cm *ConnectionManager) DisconnectUser(userID string) {
+	cm.mutex.Lock()
+	defer cm.mutex.Unlock()
+
+	delete(cm.userConnections, userID)
+	cm.log.Info("User disconnected", zap.String("userID", userID))
+}
+
 // Disconnect отключает соединение от сессии
 func (cm *ConnectionManager) Disconnect(sessionID string, conn *websocket.Conn) {
 	cm.mutex.Lock()
@@ -67,6 +92,14 @@ func (cm *ConnectionManager) Disconnect(sessionID string, conn *websocket.Conn) 
 
 	if len(cm.sessions[sessionID]) == 0 {
 		delete(cm.sessions, sessionID)
+	}
+
+	for userID, userConn := range cm.userConnections {
+		if userConn == conn {
+			delete(cm.userConnections, userID)
+			cm.log.Info("Removed user connection mapping", zap.String("userID", userID))
+			break
+		}
 	}
 
 	cm.log.Info(
@@ -102,6 +135,20 @@ func (cm *ConnectionManager) Broadcast(sessionID string, message interface{}) er
 
 // SendTo отправляет сообщение конкретному соединению
 func (cm *ConnectionManager) SendTo(conn *websocket.Conn, message interface{}) error {
+	return conn.WriteJSON(message)
+}
+
+// SendToUser отправляет сообщение конкретному пользователю по его ID
+func (cm *ConnectionManager) SendToUser(userID string, message interface{}) error {
+	cm.mutex.RLock()
+	defer cm.mutex.RUnlock()
+
+	conn, exists := cm.userConnections[userID]
+	if !exists {
+		cm.log.Warn("User connection not found", zap.String("userID", userID))
+		return nil
+	}
+
 	return conn.WriteJSON(message)
 }
 
