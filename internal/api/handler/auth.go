@@ -1,11 +1,11 @@
 package handler
 
 import (
+	"backend_go/internal/api"
 	"backend_go/internal/infrastructure/config"
 	"backend_go/internal/model/apimodel"
 	"backend_go/internal/model/converter"
 	"backend_go/internal/model/entitymodel"
-	"backend_go/internal/service"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -13,12 +13,12 @@ import (
 )
 
 type AuthHandler struct {
-	authService service.AuthService
+	authService api.AuthService
 	cfg         *config.Config
 	log         *zap.Logger
 }
 
-func NewAuthHandler(authService service.AuthService, cfg *config.Config, logger *zap.Logger) *AuthHandler {
+func NewAuthHandler(authService api.AuthService, cfg *config.Config, logger *zap.Logger) *AuthHandler {
 	return &AuthHandler{
 		authService: authService,
 		cfg:         cfg,
@@ -114,7 +114,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	if err != nil {
 		h.log.Info("Register Error", zap.Error(err))
 
-		if errors.Is(err, service.ErrUserAlreadyExists) {
+		if errors.Is(err, ErrUserAlreadyExists) {
 			c.JSON(http.StatusBadRequest, gin.H{"detail": "Пользователь с таким email уже существует"})
 			return
 		}

@@ -1,5 +1,7 @@
 package handler
 
+import "errors"
+
 // ErrorResponse стандартный ответ с ошибкой
 // @Description Сообщение об ошибке
 type ErrorResponse struct {
@@ -11,3 +13,5 @@ type ErrorResponse struct {
 type DetailResponse struct {
 	Detail string `json:"detail" example:"Пользователь с таким email уже существует"`
 }
+
+var ErrUserAlreadyExists = errors.New("user already exists")

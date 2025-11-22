@@ -2,28 +2,27 @@ package service
 
 import (
 	"backend_go/internal/model/entitymodel"
-	"backend_go/internal/repository"
 	"context"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
-type voteService struct {
-	voteRepository repository.VoteRepository
+type VoteService struct {
+	voteRepository VoteRepository
 	log            *zap.Logger
 }
 
-func NewVoteService(voteRepository repository.VoteRepository, log *zap.Logger) *voteService {
-	return &voteService{
+func NewVoteService(voteRepository VoteRepository, log *zap.Logger) *VoteService {
+	return &VoteService{
 		voteRepository: voteRepository,
 		log:            log,
 	}
 }
 
-func (s *voteService) SaveVote(ctx context.Context, vote *entitymodel.Vote) (uuid.UUID, error) {
+func (s *VoteService) SaveVote(ctx context.Context, vote *entitymodel.Vote) (uuid.UUID, error) {
 	return s.voteRepository.SetVoteValue(ctx, vote.SessionID, vote.UserID, vote.Value)
 }
 
-func (s *voteService) DeleteVoteInSession(ctx context.Context, sessionID uuid.UUID) error {
+func (s *VoteService) DeleteVoteInSession(ctx context.Context, sessionID uuid.UUID) error {
 	return s.voteRepository.DeleteVoteInSession(ctx, sessionID)
 }

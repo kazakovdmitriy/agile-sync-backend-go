@@ -13,6 +13,7 @@ const (
 	EventKickUserError SocketEvent = "kick_user_error"
 	EventUserKicked    SocketEvent = "user_kicked"
 	EventKicked        SocketEvent = "kicked"
+	EventAutoReveal    SocketEvent = "toggle_auto_reveal"
 
 	// События broadcast
 	EventSessionUpdated      SocketBroadcast = "state_update"

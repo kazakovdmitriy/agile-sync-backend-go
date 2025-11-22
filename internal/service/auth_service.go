@@ -1,9 +1,10 @@
 package service
 
 import (
+	"backend_go/internal/api"
+	"backend_go/internal/api/handler"
 	"backend_go/internal/model/apimodel"
 	"backend_go/internal/model/entitymodel"
-	"backend_go/internal/repository"
 	"backend_go/pkg/hash"
 	"context"
 	"database/sql"
@@ -13,15 +14,13 @@ import (
 	"go.uber.org/zap"
 )
 
-var ErrUserAlreadyExists = errors.New("user already exists")
-
 type AuthServiceImpl struct {
-	userRepo   repository.UserRepository
-	jwtService JWTService
+	userRepo   UserRepository
+	jwtService api.JWTService
 	log        *zap.Logger
 }
 
-func NewAuthService(userRepo repository.UserRepository, jwtService JWTService, log *zap.Logger) *AuthServiceImpl {
+func NewAuthService(userRepo UserRepository, jwtService api.JWTService, log *zap.Logger) *AuthServiceImpl {
 	return &AuthServiceImpl{
 		userRepo:   userRepo,
 		jwtService: jwtService,
@@ -37,7 +36,7 @@ func (s *AuthServiceImpl) Register(ctx context.Context, req *apimodel.UserRegist
 	}
 
 	if existingUser != nil {
-		return nil, fmt.Errorf("%w, %s", ErrUserAlreadyExists, req.Email)
+		return nil, fmt.Errorf("%w, %s", handler.ErrUserAlreadyExists, req.Email)
 	}
 
 	hashedPassword, err := hash.HashPassword(req.Password)

@@ -1,20 +1,20 @@
 package handler
 
 import (
+	"backend_go/internal/api"
 	"backend_go/internal/model/apimodel"
 	"backend_go/internal/model/entitymodel"
-	"backend_go/internal/service"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
 )
 
 type SessionHandler struct {
-	sessionService service.SessionService
+	sessionService api.SessionService
 	log            *zap.Logger
 }
 
-func NewSessionHandler(sessionService service.SessionService, log *zap.Logger) *SessionHandler {
+func NewSessionHandler(sessionService api.SessionService, log *zap.Logger) *SessionHandler {
 	return &SessionHandler{
 		sessionService: sessionService,
 		log:            log,

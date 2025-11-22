@@ -1,13 +1,13 @@
 package middleware
 
 import (
-	"backend_go/internal/service"
+	"backend_go/internal/api"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
 )
 
-func AuthMiddleware(authService service.AuthService) gin.HandlerFunc {
+func AuthMiddleware(authService api.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {

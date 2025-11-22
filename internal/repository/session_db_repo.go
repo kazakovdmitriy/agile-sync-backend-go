@@ -302,3 +302,34 @@ func (r *SessionDBRepo) RevealCardsInSession(ctx context.Context, sessionID uuid
 
 	return nil
 }
+
+func (r *SessionDBRepo) AutoRevealCardsInSession(ctx context.Context, sessionID uuid.UUID) error {
+	query := `
+	UPDATE sessions
+    SET auto_reveal = NOT auto_reveal,
+        updated_at = NOW()
+    WHERE
+        id = $1
+    RETURNING id;
+	`
+
+	var id uuid.UUID
+	err := r.db.QueryRowContext(ctx, query, sessionID).Scan(&id)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			r.log.Debug("No active connection to disconnect",
+				zap.String("session_id", sessionID.String()),
+			)
+			return nil
+		}
+
+		r.log.Error("Failed to disconnect user from session",
+			zap.String("session_id", sessionID.String()),
+			zap.Error(err),
+		)
+		return fmt.Errorf("db update failed: %w", err)
+	}
+
+	return nil
+}

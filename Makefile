@@ -9,8 +9,8 @@ SWAGGER_DOCS_PATH=docs
 CONFIG_PATH=configs/config.yaml
 MIGRATION_DIR=migrations
 MOCKS_DIR=internal/mocks
-SERVICE_INTERFACE_FILE=internal/service/interfaces.go
-REPOSITORY_INTERFACE_FILE=internal/repository/interfaces.go
+SERVICE_INTERFACE_FILE=internal/api/interfaces.go
+REPOSITORY_INTERFACE_FILE=internal/service/interfaces.go
 
 # Цвета для вывода
 GREEN=\033[0;32m
